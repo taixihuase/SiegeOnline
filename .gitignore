@@ -67,9 +67,7 @@ obj/
 *.csproj
 *.pidb
 *.suo
-/*.sln
-SiegeOnlineClient/*.sln
-SiegeOnlineServer/*.sln
+*.sln
 *.user
 *.unityproj
 *.booproj
