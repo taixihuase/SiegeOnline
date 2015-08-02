@@ -53,7 +53,7 @@ Library/
 PhotonServer/
 TestClient/
 SiegeOnline_Data/
-.exe
+*.exe
 
 =====================================
 # Visual Studio / MonoDevelop generated
