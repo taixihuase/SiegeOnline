@@ -74,16 +74,18 @@ namespace SiegeOnlineClient.PhotonClient
         /// 类型：方法
         /// 名称：Connect
         /// 作者：taixihuase
-        /// 作用：尝试通过 ip 地址、端口及服务端进程名，与服务端连线
+        /// 作用：尝试通过 ip 地址、端口、传输协议及服务端进程名，与服务端连线
         /// 编写日期：2015/7/17
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
+        /// <param name="connectionProtocol"></param>
         /// <param name="serverName"></param>
-        public void Connect(string ip, int port, string serverName)
+        public void Connect(string ip, int port, ExitGames.Client.Photon.ConnectionProtocol connectionProtocol,
+            string serverName)
         {
             string serverAddress = ip + ":" + port.ToString();
-            Peer = new PhotonPeer(this, ConnectionProtocol.Udp);
+            Peer = new PhotonPeer(this, connectionProtocol);
             Peer.Connect(serverAddress, serverName);
         }
 

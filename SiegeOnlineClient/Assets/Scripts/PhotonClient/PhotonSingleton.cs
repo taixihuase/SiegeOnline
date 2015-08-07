@@ -19,6 +19,7 @@
 //
 //----------------------------------------------------------------------------------------------------------
 
+using ExitGames.Client.Photon;
 using UnityEngine;
 // ReSharper disable UnusedMember.Local
 // ReSharper disable CheckNamespace
@@ -57,13 +58,16 @@ namespace SiegeOnlineClient.PhotonClient
         public static PhotonService Service;
 
         // 服务端 IP 地址
-        public string ServerIp = "localhost";
+        private static string ServerIp = "localhost";
 
         // 服务端端口号
-        public int ServerPort = 5055;
+        private static int ServerPort = 4530;
+
+        // 服务端连接协议
+        private static ConnectionProtocol ConnectionProtocol = ConnectionProtocol.Tcp;
 
         // 服务端进程名
-        public string ServerName = "SiegeOnlineServer";
+        private static string ServerName = "SiegeOnlineServer";
 
         /// <summary>
         /// 类型：方法
@@ -94,7 +98,7 @@ namespace SiegeOnlineClient.PhotonClient
         // Use this for initialization
         void Start()
         {
-            Service.Connect(ServerIp, ServerPort, ServerName);
+            Service.Connect(ServerIp, ServerPort, ConnectionProtocol, ServerName);
         }
 
         // Update is called once per frame

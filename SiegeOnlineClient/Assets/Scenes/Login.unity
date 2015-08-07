@@ -448,9 +448,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74d0338e87af35d45b5155b294a48f06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ServerIp: localhost
-  ServerPort: 5055
-  ServerName: SiegeOnlineServer
 --- !u!4 &573375280
 Transform:
   m_ObjectHideFlags: 0
