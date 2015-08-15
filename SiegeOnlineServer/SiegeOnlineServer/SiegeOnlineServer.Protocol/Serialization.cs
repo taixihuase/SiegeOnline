@@ -62,7 +62,7 @@ namespace SiegeOnlineServer.Protocol
         /// <returns></returns>
         public static object Deserialize(object serializedArray)
         {
-            MemoryStream stream = new MemoryStream((byte[])serializedArray);
+            MemoryStream stream = new MemoryStream((byte[]) serializedArray);
             IFormatter formatter = new BinaryFormatter();
             stream.Seek(0, SeekOrigin.Begin);
             object unSerializedObj = formatter.Deserialize(stream);

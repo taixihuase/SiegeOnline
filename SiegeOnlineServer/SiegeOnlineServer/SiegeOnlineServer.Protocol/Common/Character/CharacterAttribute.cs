@@ -35,7 +35,6 @@ namespace SiegeOnlineServer.Protocol.Common.Character
     {
         public DateTime WorldEnterTime { get; set; }
 
-
         public CharacterAttribute(AttributeBase attribute = null) : base(attribute)
         {
             WorldEnterTime = new DateTime();

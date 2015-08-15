@@ -35,13 +35,13 @@ namespace SiegeOnlineServer.Protocol.Common.Character
     {
         public string Name { get; set; }                                // 职业名
 
-        public int BaseHealthyPoint { get; set; }                       // 基础生命值
+        public int BaseHitPoint { get; set; }                           // 基础生命值
 
-        public int BaseEnergyValue { get; set; }                        // 基础能量值
+        public int BaseMana { get; set; }                               // 基础法力值
 
         public int BaseAttack { get; set; }                             // 基础攻击力
 
-        public int BaseDefence { get; set; }                            // 基础防御力
+        public int BaseDefense { get; set; }                            // 基础防御力
 
         public Occupation(string name = "")
         {

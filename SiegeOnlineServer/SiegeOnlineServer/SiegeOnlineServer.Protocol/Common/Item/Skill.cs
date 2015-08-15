@@ -35,12 +35,18 @@ namespace SiegeOnlineServer.Protocol.Common.Item
     {
         public string Name { get; protected set; }
 
-        public int SkillId { get; protected set; }
+        public int FixedId { get; protected set; }
 
-        public Skill(int id, string name)
+        public Skill(int fixedId, string name)
         {
-            SkillId = id;
+            FixedId = fixedId;
             Name = name;
+        }
+
+        public Skill()
+        {
+            FixedId = 0;
+            Name = "";
         }
     }
 }

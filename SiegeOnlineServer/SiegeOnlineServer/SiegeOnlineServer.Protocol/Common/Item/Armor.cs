@@ -20,6 +20,8 @@
 //----------------------------------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+// ReSharper disable InconsistentNaming
 
 namespace SiegeOnlineServer.Protocol.Common.Item
 {
@@ -33,11 +35,57 @@ namespace SiegeOnlineServer.Protocol.Common.Item
     [Serializable]
     public class Armor
     {
+        public int FixedId { get; protected set; }
+
+        public int AllocatedId { get; protected set; }
+
         public string Name { get; protected set; }
 
-        public Armor(string name)
+        #region 防具类型
+
+        [Serializable]
+        public enum ArmorType : byte
         {
+
+        }
+
+        public byte Type { get; protected set; }
+
+        #endregion
+
+        [Serializable]
+        public enum DefenseType : byte
+        {
+            Null,
+            Defense_Physical,
+            Defense_Magic
+        }
+
+        public Dictionary<DefenseType, int> DefensePoints; // 防御力
+
+        public Dictionary<int, Dictionary<AttributeCode, int>> ForgingAttributes; // 锻造附加属性
+
+        public Armor(int guid, int allocatedId, string name, ArmorType type)
+        {
+            FixedId = guid;
+            AllocatedId = allocatedId;
             Name = name;
+            Type = (byte) type;
+            DefensePoints = new Dictionary<DefenseType, int>();
+            ForgingAttributes = new Dictionary<int, Dictionary<AttributeCode, int>>();
+        }
+
+        public Armor()
+        {
+            FixedId = 0;
+            AllocatedId = 0;
+            Name = "";
+            Type = 0;
+            DefensePoints = new Dictionary<DefenseType, int> {{DefenseType.Null, 0}};
+            ForgingAttributes = new Dictionary<int, Dictionary<AttributeCode, int>>
+            {
+                {-1, new Dictionary<AttributeCode, int> {{AttributeCode.Null, 0}}}
+            };
         }
     }
 }

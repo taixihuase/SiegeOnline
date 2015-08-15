@@ -35,13 +35,9 @@ namespace SiegeOnlineServer.Protocol.Common.Character
     {
         public int Level { get; set; }                              // 等级
 
-        public int HealthyPoint { get; set; }                       // 生命值
+        public int HitPoint { get; set; }                           // 生命值
 
-        public int EnergyValue { get; set; }                        // 能量值
-
-        public int Attack { get; set; }                             // 攻击力
-
-        public int Defence { get; set; }                            // 防御力
+        public int Mana { get; set; }                               // 法力值
 
         public Position Position { get; set; }                      // 位置信息
 
@@ -58,19 +54,15 @@ namespace SiegeOnlineServer.Protocol.Common.Character
             if (attribute != null)
             {
                 Level = attribute.Level;
-                HealthyPoint = attribute.HealthyPoint;
-                EnergyValue = attribute.EnergyValue;
-                Attack = attribute.Attack;
-                Defence = attribute.Defence;
+                HitPoint = attribute.HitPoint;
+                Mana = attribute.Mana;
                 Position = attribute.Position;
             }
             else
             {
                 Level = 1;
-                HealthyPoint = 1;
-                EnergyValue = 0;
-                Attack = 0;
-                Defence = 0;
+                HitPoint = 1;
+                Mana = 0;
                 Position = new Position();
                 Position.SetBirthplace();
             }
@@ -87,10 +79,8 @@ namespace SiegeOnlineServer.Protocol.Common.Character
         public void SetBirthAttribute(Occupation occupation)
         {
             Level = 1;
-            HealthyPoint = occupation.BaseHealthyPoint;
-            EnergyValue = occupation.BaseEnergyValue;
-            Attack = occupation.BaseAttack;
-            Defence = occupation.BaseDefence;
+            HitPoint = occupation.BaseHitPoint;
+            Mana = occupation.BaseMana;
         }
     }
 }

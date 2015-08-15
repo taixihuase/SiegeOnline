@@ -30,10 +30,10 @@ namespace SiegeOnlineServer.Protocol
     /// </summary>
     public enum ErrorCode
     {
-        Ok                  =   0,      // 成功
-        CustomError         =   1,      // 自定义错误
-        InvalidOperation    =   2,      // 非法操作
-        RepeatedOperation   =   3,      // 重复操作
-        CharacterNotFound   =   4,      // 无可操作角色
+        Ok = 0, // 成功
+        CustomError = 1, // 自定义错误
+        InvalidOperation = 2, // 非法操作
+        RepeatedOperation = 3, // 重复操作
+        CharacterNotFound = 4, // 无可操作角色
     }
 }

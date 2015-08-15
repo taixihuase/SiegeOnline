@@ -44,6 +44,8 @@ namespace SiegeOnlineServer.Protocol.Common.Character
 
         public Dictionary<int, Armor> Armors;                                           // 防具清单
 
+        public Dictionary<int, Jewel> Jewels;                                           // 饰品清单 
+
         public Dictionary<int, Skill> Skills;                                           // 技能清单 
 
         /// <summary>
@@ -58,9 +60,10 @@ namespace SiegeOnlineServer.Protocol.Common.Character
         {
             Attribute = new CharacterAttribute();
             Occupation = new Occupation();
-            Weapons = new Dictionary<int, Weapon> {{-1, new Weapon("")}};
-            Armors = new Dictionary<int, Armor> {{-1, new Armor("")}};
-            Skills = new Dictionary<int, Skill> {{-1, new Skill(-1, "")}};
+            Weapons = new Dictionary<int, Weapon> {{-1, new Weapon()}};
+            Armors = new Dictionary<int, Armor> {{-1, new Armor()}};
+            Jewels = new Dictionary<int, Jewel> {{-1, new Jewel()}};
+            Skills = new Dictionary<int, Skill> {{-1, new Skill()}};
         }
     }
 }

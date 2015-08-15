@@ -86,10 +86,10 @@ namespace SiegeOnlineServer.Database
             {
                 case (byte) CreateInfo.OccupationTypes.Warrior:
                     character.Occupation.Name = "战士";
-                    character.Occupation.BaseHealthyPoint = 100;
-                    character.Occupation.BaseEnergyValue = 50;
+                    character.Occupation.BaseHitPoint = 100;
+                    character.Occupation.BaseMana = 50;
                     character.Occupation.BaseAttack = 1;
-                    character.Occupation.BaseDefence = 0;
+                    character.Occupation.BaseDefense = 0;
                     character.Attribute.SetBirthAttribute(character.Occupation);
                     character.Attribute.Position.SetBirthplace();
                     break;

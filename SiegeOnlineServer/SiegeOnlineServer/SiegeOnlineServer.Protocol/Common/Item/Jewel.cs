@@ -2,11 +2,11 @@
 // Copyright (C) 2015-2016 SiegeOnline
 // 版权所有
 //
-// 文件名：Weapon.cs
+// 文件名：Jewel.cs
 //
 // 文件功能描述：
 //
-// 武器属性
+// 防具属性
 //
 // 创建标识：taixihuase 20150723
 //
@@ -27,13 +27,13 @@ namespace SiegeOnlineServer.Protocol.Common.Item
 {
     /// <summary>
     /// 类型：类
-    /// 名称：Weapon
+    /// 名称：Jewel
     /// 作者：taixihuase
-    /// 作用：武器类
+    /// 作用：首饰类
     /// 编写日期：2015/7/23
     /// </summary>
     [Serializable]
-    public class Weapon
+    public class Jewel
     {
         public int FixedId { get; protected set; }
 
@@ -41,10 +41,10 @@ namespace SiegeOnlineServer.Protocol.Common.Item
 
         public string Name { get; protected set; }
 
-        #region 武器类型
+        #region 饰品类型
 
         [Serializable]
-        public enum WeaponType : byte
+        public enum JewelType : byte
         {
 
         }
@@ -53,41 +53,24 @@ namespace SiegeOnlineServer.Protocol.Common.Item
 
         #endregion
 
-        [Serializable]
-        public enum AttackLimit : byte
-        {
-            Null,
-            Attack_Physical_Min,
-            Attack_Physical_Max,
-            Attack_Magic_Min,
-            Attack_Magic_Max
-        }
+        public Dictionary<AttributeCode, int> AbilityPoints; // 防御力上下限
 
-        public Dictionary<AttackLimit, int> AttackPoints; // 攻击力上下限
-
-        public Dictionary<int, Dictionary<AttributeCode, int>> ForgingAttributes; // 锻造附加属性
-
-        public Weapon(int guid, int uniqueId, string name, WeaponType type)
+        public Jewel(int guid, int allocatedId, string name, JewelType type)
         {
             FixedId = guid;
-            AllocatedId = uniqueId;
+            AllocatedId = allocatedId;
             Name = name;
             Type = (byte) type;
-            AttackPoints = new Dictionary<AttackLimit, int>();
-            ForgingAttributes = new Dictionary<int, Dictionary<AttributeCode, int>>();
+            AbilityPoints = new Dictionary<AttributeCode, int>();
         }
 
-        public Weapon()
+        public Jewel()
         {
             FixedId = 0;
             AllocatedId = 0;
             Name = "";
             Type = 0;
-            AttackPoints = new Dictionary<AttackLimit, int> {{AttackLimit.Null, 0}};
-            ForgingAttributes = new Dictionary<int, Dictionary<AttributeCode, int>>
-            {
-                {-1, new Dictionary<AttributeCode, int> {{AttributeCode.Null, 0}}}
-            };
+            AbilityPoints = new Dictionary<AttributeCode, int> {{AttributeCode.Null, 0}};
         }
     }
 }

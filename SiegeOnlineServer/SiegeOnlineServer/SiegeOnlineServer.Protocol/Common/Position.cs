@@ -33,20 +33,34 @@ namespace SiegeOnlineServer.Protocol.Common
     [Serializable]
     public class Position
     {
-        public float X { get; set; }                // X坐标
+        [Serializable]
+        public enum MapCode : byte
+        {
+            World,
+        }
 
-        public float Y { get; set; }                // Y坐标
+        public byte Map { get; set; } // 地图编号
 
-        public float Z { get; set; }                // Z坐标
+        public float X { get; set; } // X坐标
 
-        public float Direction { get; set; }        // 朝向
+        public float Y { get; set; } // Y坐标
 
-        public Position(float x = 0, float y = 0, float z = 0, float dir = 0)
+        public float Z { get; set; } // Z坐标
+
+        public float Direction { get; set; } // 朝向
+
+        public Position(float x = 0, float y = 0, float z = 0, float dir = 0, MapCode map = MapCode.World)
         {
             X = x;
             Y = y;
             Z = z;
             Direction = dir;
+            Map = (byte) map;
+        }
+
+        public void SetMap(MapCode map)
+        {
+            Map = (byte) map;
         }
 
         public void SetPosition(float x, float y, float z)
@@ -68,6 +82,7 @@ namespace SiegeOnlineServer.Protocol.Common
             Y = 0;
             Z = 0;
             Direction = 0;
+            Map = (byte) MapCode.World;
         }
     }
 }

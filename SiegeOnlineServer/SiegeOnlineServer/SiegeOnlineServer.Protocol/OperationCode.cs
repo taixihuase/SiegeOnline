@@ -32,30 +32,30 @@ namespace SiegeOnlineServer.Protocol
     {
         #region 基本操作码
 
-        Connect,            // 连接
-        Disconnect,         // 断线
-        Login,              // 登录账号
-        Logout,             // 登出账号
-        CreateCharacter,    // 创建角色
-        WorldEnter,         // 进入游戏场景
-        WorldExit,          // 退出游戏场景
+        Connect, // 连接
+        Disconnect, // 断线
+        Login, // 登录账号
+        Logout, // 登出账号
+        CreateCharacter, // 创建角色
+        WorldEnter, // 进入游戏场景
+        WorldExit, // 退出游戏场景
 
         #endregion
 
         #region 角色动作码
 
-        Idle,               // 空闲
-        WalkForward ,       // 向前走
-        WalkBackward,       // 倒退走
-        Run,                // 跑步
-        Jump,               // 原地跳跃
-        JumpForward,        // 向前跳跃
-        JumpBackward,       // 向后跳跃
-        Stun,               // 晕眩
-        Chaos,              // 混乱
-        Attack,             // 普通攻击
-        Cast,               // 施法
-        Die,                // 死亡
+        Idle, // 空闲
+        WalkForward, // 向前走
+        WalkBackward, // 倒退走
+        Run, // 跑步
+        Jump, // 原地跳跃
+        JumpForward, // 向前跳跃
+        JumpBackward, // 向后跳跃
+        Stun, // 晕眩
+        Chaos, // 混乱
+        Attack, // 普通攻击
+        Cast, // 施法
+        Die, // 死亡
 
         #endregion
     }
