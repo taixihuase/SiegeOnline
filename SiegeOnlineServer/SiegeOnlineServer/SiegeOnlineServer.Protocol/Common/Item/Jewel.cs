@@ -29,24 +29,30 @@ namespace SiegeOnlineServer.Protocol.Common.Item
     /// 类型：类
     /// 名称：Jewel
     /// 作者：taixihuase
-    /// 作用：首饰类
+    /// 作用：饰品类
     /// 编写日期：2015/7/23
     /// </summary>
     [Serializable]
     public class Jewel
     {
-        public int FixedId { get; protected set; }
+        public int FixedId { get; protected set; }              // 数据库固定编号
 
-        public int AllocatedId { get; protected set; }
+        public int AllocatedId { get; protected set; }          // 动态分配编号
 
         public string Name { get; protected set; }
+
+        public int MaxLevel { get; protected set; }
+
+        public int LevelLimit { get; protected set; }
+
+        public int CurrentLevel { get; set; }
 
         #region 饰品类型
 
         [Serializable]
         public enum JewelType : byte
         {
-
+            Null,
         }
 
         public byte Type { get; protected set; }
@@ -55,11 +61,14 @@ namespace SiegeOnlineServer.Protocol.Common.Item
 
         public Dictionary<AttributeCode, int> AbilityPoints; // 防御力上下限
 
-        public Jewel(int guid, int allocatedId, string name, JewelType type)
+        public Jewel(int guid, int allocatedId, string name, int limit, int max, int cur, JewelType type)
         {
             FixedId = guid;
             AllocatedId = allocatedId;
             Name = name;
+            LevelLimit = limit;
+            MaxLevel = max;
+            CurrentLevel = cur;
             Type = (byte) type;
             AbilityPoints = new Dictionary<AttributeCode, int>();
         }
@@ -69,7 +78,10 @@ namespace SiegeOnlineServer.Protocol.Common.Item
             FixedId = 0;
             AllocatedId = 0;
             Name = "";
-            Type = 0;
+            LevelLimit = 0;
+            MaxLevel = 0;
+            CurrentLevel = 0;
+            Type = (byte) JewelType.Null;
             AbilityPoints = new Dictionary<AttributeCode, int> {{AttributeCode.Null, 0}};
         }
     }

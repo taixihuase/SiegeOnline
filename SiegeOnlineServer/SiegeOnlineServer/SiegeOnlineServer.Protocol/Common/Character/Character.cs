@@ -36,17 +36,17 @@ namespace SiegeOnlineServer.Protocol.Common.Character
     [Serializable]
     public class Character : UserBase
     {
-        public CharacterAttribute Attribute { get; set; }                               // 角色属性
+        public CharacterAttribute Attribute { get; set; } // 角色属性
 
-        public Occupation Occupation { get; set; }                                      // 职业属性
+        public Occupation Occupation { get; set; } // 职业属性
 
-        public Dictionary<int, Weapon> Weapons;                                         // 武器清单
+        public Dictionary<int, Weapon> Weapons; // 武器清单
 
-        public Dictionary<int, Armor> Armors;                                           // 防具清单
+        public Dictionary<int, Armor> Armors; // 防具清单
 
-        public Dictionary<int, Jewel> Jewels;                                           // 饰品清单 
+        public Dictionary<int, Jewel> Jewels; // 饰品清单 
 
-        public Dictionary<int, Skill> Skills;                                           // 技能清单 
+        public Dictionary<int, Skill> Skills; // 技能清单 
 
         /// <summary>
         /// 类型：方法

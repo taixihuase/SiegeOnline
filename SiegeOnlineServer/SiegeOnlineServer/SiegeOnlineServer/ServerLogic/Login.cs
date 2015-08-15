@@ -93,7 +93,7 @@ namespace SiegeOnlineServer.ServerLogic
 
                 // 用于选择的返回值
                 short returnCode = -1;
-                
+
                 #region 获取角色资料
 
                 Character character = new Character(user);

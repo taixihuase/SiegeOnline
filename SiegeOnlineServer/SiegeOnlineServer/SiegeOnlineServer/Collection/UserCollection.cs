@@ -48,11 +48,11 @@ namespace SiegeOnlineServer.Collection
         protected Dictionary<Guid, int> GuidToUniqueId { get; set; }
 
         // 从账号名获得编号
-        protected Dictionary<string, int> AccountToUniqueId { get; set; } 
+        protected Dictionary<string, int> AccountToUniqueId { get; set; }
 
         // 从昵称取得编号
-        protected Dictionary<string, int> NicknameToUniqueId { get; set; } 
-    
+        protected Dictionary<string, int> NicknameToUniqueId { get; set; }
+
         // 从编号获得用户信息
         protected Dictionary<int, UserBase> UniqueIdToUser { get; set; }
 
@@ -94,11 +94,11 @@ namespace SiegeOnlineServer.Collection
             [Serializable]
             public enum ReturnCodeTypes : byte
             {
-                Default,            // 初始默认值
-                Success,            // 登录成功
-                RepeatedLogin,      // 重复登录
-                WrongPassword,      // 错误密码
-                Unregister,         // 账号未注册
+                Default, // 初始默认值
+                Success, // 登录成功
+                RepeatedLogin, // 重复登录
+                WrongPassword, // 错误密码
+                Unregister, // 账号未注册
             }
 
             /// <summary>
@@ -110,7 +110,7 @@ namespace SiegeOnlineServer.Collection
             /// </summary>
             public UserReturn()
             {
-                ReturnCode = (byte)ReturnCodeTypes.Default;
+                ReturnCode = (byte) ReturnCodeTypes.Default;
                 DebugMessage = new StringBuilder();
             }
         }
@@ -306,7 +306,7 @@ namespace SiegeOnlineServer.Collection
         /// <param name="nickname"></param>
         /// <returns></returns>
         public UserBase GetUserFromNickname(string nickname)
-        {   
+        {
             int id;
             if ((id = GetUniqueIdFromNickname(nickname)) >= 0)
             {

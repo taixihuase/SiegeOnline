@@ -56,7 +56,8 @@ namespace SiegeOnlineServer
         /// <param name="protocol"></param>
         /// <param name="unmanagedPeer"></param>
         /// <param name="server"></param>
-        public ServerPeer(IRpcProtocol protocol, IPhotonPeer unmanagedPeer, ServerApplication server) : base(protocol, unmanagedPeer)
+        public ServerPeer(IRpcProtocol protocol, IPhotonPeer unmanagedPeer, ServerApplication server)
+            : base(protocol, unmanagedPeer)
         {
             PeerGuid = Guid.NewGuid();
             Server = server;

@@ -19,10 +19,8 @@
 //
 //----------------------------------------------------------------------------------------------------------
 
-// ReSharper disable InconsistentNaming
-
-
 using System;
+// ReSharper disable InconsistentNaming
 
 namespace SiegeOnlineServer.Protocol.Common
 {

@@ -78,9 +78,9 @@ namespace SiegeOnlineServer.Collection
             [Serializable]
             public enum ReturnCodeTypes : byte
             {
-                Default                 =   0,          // 初始默认值
-                Success                 =   1,          // 获取资料成功
-                CharacterNotFound       =   2,          // 无角色信息
+                Default = 0, // 初始默认值
+                Success = 1, // 获取资料成功
+                CharacterNotFound = 2, // 无角色信息
             }
 
             /// <summary>

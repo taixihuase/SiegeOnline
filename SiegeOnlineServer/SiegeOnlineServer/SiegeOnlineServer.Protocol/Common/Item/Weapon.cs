@@ -35,11 +35,17 @@ namespace SiegeOnlineServer.Protocol.Common.Item
     [Serializable]
     public class Weapon
     {
-        public int FixedId { get; protected set; }
+        public int FixedId { get; protected set; }              // 数据库固定编号
 
-        public int AllocatedId { get; protected set; }
+        public int AllocatedId { get; protected set; }          // 动态分配编号
 
         public string Name { get; protected set; }
+
+        public int MaxLevel { get; protected set; }
+
+        public int LevelLimit { get; protected set; }
+
+        public int CurrentLevel { get; set; }
 
         #region 武器类型
 
@@ -67,11 +73,14 @@ namespace SiegeOnlineServer.Protocol.Common.Item
 
         public Dictionary<int, Dictionary<AttributeCode, int>> ForgingAttributes; // 锻造附加属性
 
-        public Weapon(int guid, int uniqueId, string name, WeaponType type)
+        public Weapon(int guid, int uniqueId, string name, int limit, int max, int cur, WeaponType type)
         {
             FixedId = guid;
             AllocatedId = uniqueId;
             Name = name;
+            LevelLimit = limit;
+            MaxLevel = max;
+            CurrentLevel = cur;
             Type = (byte) type;
             AttackPoints = new Dictionary<AttackLimit, int>();
             ForgingAttributes = new Dictionary<int, Dictionary<AttributeCode, int>>();
@@ -82,7 +91,10 @@ namespace SiegeOnlineServer.Protocol.Common.Item
             FixedId = 0;
             AllocatedId = 0;
             Name = "";
-            Type = 0;
+            LevelLimit = 0;
+            MaxLevel = 0;
+            CurrentLevel = 0;
+            Type = (byte) AttackLimit.Null;
             AttackPoints = new Dictionary<AttackLimit, int> {{AttackLimit.Null, 0}};
             ForgingAttributes = new Dictionary<int, Dictionary<AttributeCode, int>>
             {
