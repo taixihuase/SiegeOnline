@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using SiegeOnlineServer.Protocol.Common.Item;
+using SiegeOnlineServer.Protocol.Common.Item.Equipment;
 using SiegeOnlineServer.Protocol.Common.User;
 
 namespace SiegeOnlineServer.Protocol.Common.Character
