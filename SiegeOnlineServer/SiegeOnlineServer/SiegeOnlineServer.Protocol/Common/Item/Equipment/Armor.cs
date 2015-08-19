@@ -39,6 +39,13 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
     {
         #region 防具类型
 
+        /// <summary>
+        /// 类型：枚举
+        /// 名称：ArmorType
+        /// 作者：taixihuase
+        /// 作用：防具类型枚举
+        /// 编写日期：2015/8/16
+        /// </summary>
         [Serializable]
         public enum ArmorType : byte
         {
@@ -49,21 +56,33 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             Helmet,
         }
 
-        public byte Type { get; protected set; }
+        public byte Type { get; protected set; } // 防具类型
 
         #endregion
 
-        public int[] DefensePoints { get; set; }
+        public int[] DefensePoints { get; set; } // 双防加成数值
 
         public Dictionary<int, KeyValuePair<AttributeCode, float>> ForgingAttributes; // 锻造附加属性
 
-        public Armor(int fixedId, int allocatedId, string name, int limit, int cur, ArmorType type)
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Armor
+        /// 作者：taixihuase
+        /// 作用：通过数据库中获得的数据构造防具装备实例
+        /// 编写日期：2015/8/16
+        /// </summary>
+        /// <param name="fixedId"></param>
+        /// <param name="allocatedId"></param>
+        /// <param name="name"></param>
+        /// <param name="occupation"></param>
+        /// <param name="limit"></param>
+        /// <param name="cur"></param>
+        /// <param name="dur"></param>
+        /// <param name="type"></param>
+        public Armor(int fixedId, int allocatedId, string name, OccupationCode occupation, int limit, int cur, int dur,
+            ArmorType type)
+            : base(fixedId, allocatedId, name, occupation, limit, cur, dur, EquipmentType.Armor)
         {
-            FixedId = fixedId;
-            AllocatedId = allocatedId;
-            Name = name;
-            LevelLimit = limit;
-            CurrentLevel = cur;
             Type = (byte) type;
             DefensePoints = new[] {0, 0};
             ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, float>>
@@ -72,13 +91,15 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             };
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Armor
+        /// 作者：taixihuase
+        /// 作用：构造空的防具装备实例
+        /// 编写日期：2015/8/16
+        /// </summary>
         public Armor()
         {
-            FixedId = 0;
-            AllocatedId = 0;
-            Name = "";
-            LevelLimit = 0;
-            CurrentLevel = 0;
             DefensePoints = new[] {0, 0};
             ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, float>>
             {
@@ -86,6 +107,15 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             };
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：UpdateDefensePoints
+        /// 作者：taixihuase
+        /// 作用：变更防具的双防数值
+        /// 编写日期：2015/8/16
+        /// </summary>
+        /// <param name="physical"></param>
+        /// <param name="magic"></param>
         public void UpdateDefensePoints(int physical, int magic)
         {
             if (DefensePoints.Count() >= 0)
@@ -94,6 +124,8 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                 DefensePoints[1] = magic;
             }
         }
+
+        #region IEquipment接口实现
 
         public void UpdateForgingAttribute(int level, AttributeCode attribute, float value)
         {
@@ -135,6 +167,10 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             }
         }
 
+        #endregion
+
+        #region 重载抽象基类方法
+
         public override void Apply(Character.Character character)
         {
             base.Apply(character);
@@ -164,5 +200,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             }
             CalculateCharacterAttributes(character);
         }
+
+        #endregion
     }
 }

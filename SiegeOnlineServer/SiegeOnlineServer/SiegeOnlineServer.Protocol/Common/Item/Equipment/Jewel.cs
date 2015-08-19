@@ -38,42 +38,80 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
     {
         #region 饰品类型
 
+        /// <summary>
+        /// 类型：枚举
+        /// 名称：JewelType
+        /// 作者：taixihuase
+        /// 作用：饰品类型枚举
+        /// 编写日期：2015/8/16
+        /// </summary>
         [Serializable]
         public enum JewelType : byte
         {
             Null,
-            Bracelet,           // 手镯
-            Earring,            // 耳环
-            Necklace,           // 项链
-            Ring                // 戒指
+            Bracelet, // 手镯
+            Earring, // 耳环
+            Necklace, // 项链
+            Ring // 戒指
         }
 
-        public byte Type { get; protected set; }
+        public byte Type { get; protected set; } // 饰品类型
 
         #endregion
 
         #region 饰品属性类型
 
+        /// <summary>
+        /// 类型：枚举
+        /// 名称：JewelAttributeType
+        /// 作者：taixihuase
+        /// 作用：饰品特殊属性类型枚举
+        /// 编写日期：2015/8/16
+        /// </summary>
         [Serializable]
         public enum JewelAttributeType : byte
         {
             Null,
         }
 
-        public JewelAttributeType JewelAttribute { get; protected set; }
+        public JewelAttributeType JewelAttribute { get; protected set; } // 饰品特殊属性类型
 
-        public KeyValuePair<JewelAttributeType, float> SpecialAttribute;
+        public KeyValuePair<JewelAttributeType, float> SpecialAttribute; // 饰品特殊属性（单条）
 
         #endregion
 
-        public Jewel(Equipment equipment, JewelType type, JewelAttributeType jewelAttributeType)
-            : base(equipment)
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Jewel
+        /// 作者：taixihuase
+        /// 作用：通过数据库中获得的数据构造饰品装备实例
+        /// 编写日期：2015/8/16
+        /// </summary>
+        /// <param name="fixedId"></param>
+        /// <param name="allocatedId"></param>
+        /// <param name="name"></param>
+        /// <param name="occupation"></param>
+        /// <param name="limit"></param>
+        /// <param name="cur"></param>
+        /// <param name="dur"></param>
+        /// <param name="type"></param>
+        /// <param name="jewelAttributeType"></param>
+        public Jewel(int fixedId, int allocatedId, string name, OccupationCode occupation, int limit, int cur, int dur,
+            JewelType type, JewelAttributeType jewelAttributeType)
+            : base(fixedId, allocatedId, name, occupation, limit, cur, dur, EquipmentType.Jewel)
         {
             Type = (byte) type;
             JewelAttribute = jewelAttributeType;
             SpecialAttribute = new KeyValuePair<JewelAttributeType, float>(jewelAttributeType, 0);
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Jewel
+        /// 作者：taixihuase
+        /// 作用：构造空的饰品装备实例
+        /// 编写日期：2015/8/16
+        /// </summary>
         public Jewel()
         {
             Type = (byte) JewelType.Null;
@@ -81,6 +119,14 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             SpecialAttribute = new KeyValuePair<JewelAttributeType, float>(JewelAttributeType.Null, 0);
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：UpdateSpecialAttribute
+        /// 作者：taixihuase
+        /// 作用：变更饰品特殊属性数值
+        /// 编写日期：2015/8/16
+        /// </summary>
+        /// <param name="value"></param>
         public void UpdateSpecialAttribute(float value)
         {
             if (value > 0)
@@ -89,6 +135,14 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             }
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：UpdateSpecialAttributeType
+        /// 作者：taixihuase
+        /// 作用：变更饰品特殊属性类型
+        /// 编写日期：2015/8/16
+        /// </summary>
+        /// <param name="jewelAttribute"></param>
         public void UpdateSpecialAttributeType(JewelAttributeType jewelAttribute)
         {
             JewelAttribute = jewelAttribute;

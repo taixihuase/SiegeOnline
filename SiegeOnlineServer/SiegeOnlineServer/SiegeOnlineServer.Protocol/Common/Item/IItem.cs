@@ -30,8 +30,24 @@ namespace SiegeOnlineServer.Protocol.Common.Item
     /// </summary>
     interface IItem
     {
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Apply
+        /// 作者：taixihuase
+        /// 作用：使用道具或穿戴道具时，应用道具效果到指定角色上
+        /// 编写日期：2015/8/19
+        /// </summary>
+        /// <param name="character"></param>
         void Apply(Character.Character character);
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Cancel
+        /// 作者：taixihuase
+        /// 作用：道具失效或卸下道具时，取消指定角色上的道具效果
+        /// 编写日期：2015/8/19
+        /// </summary>
+        /// <param name="character"></param>
         void Cancel(Character.Character character);
     }
 }

@@ -38,18 +38,32 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
     {
         #region 武器类型
 
+        /// <summary>
+        /// 类型：枚举
+        /// 名称：WeaponType
+        /// 作者：taixihuase
+        /// 作用：武器类型枚举
+        /// 编写日期：2015/8/16
+        /// </summary>
         [Serializable]
         public enum WeaponType : byte
         {
             Null,
         }
 
-        public byte Type { get; protected set; }
+        public byte Type { get; protected set; } // 武器类型
 
         #endregion
 
         #region 攻击属性类型
 
+        /// <summary>
+        /// 类型：枚举
+        /// 名称：WeaponAttributeType
+        /// 作者：taixihuase
+        /// 作用：武器攻击属性类型枚举
+        /// 编写日期：2015/8/16
+        /// </summary>
         [Serializable]
         public enum WeaponAttributeType : byte
         {
@@ -58,28 +72,45 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             Physical
         }
 
-        public WeaponAttributeType WeaponAttribute { get; protected set; }
+        public WeaponAttributeType WeaponAttribute { get; protected set; } // 武器攻击属性类型
 
-        public Dictionary<WeaponAttributeType, KeyValuePair<int, int>> AttackLimit;             // 攻击力上下限
+        public Dictionary<WeaponAttributeType, KeyValuePair<int, int>> AttackLimit; // 攻击力上下限
 
         #endregion
 
         #region 其余武器固有属性
 
-        public int FixedAttackSpeed { get; protected set; }                                     // 武器攻击速度
+        public int FixedAttackSpeed { get; protected set; } // 武器攻击速度
 
-        public int FixedAttackDistance { get; protected set; }                                  // 武器攻击射程
+        public int FixedAttackDistance { get; protected set; } // 武器攻击射程
 
         #endregion
 
-        public Dictionary<int, KeyValuePair<AttributeCode, float>> ForgingAttributes;           // 锻造附加属性
+        public Dictionary<int, KeyValuePair<AttributeCode, float>> ForgingAttributes; // 锻造附加属性
 
-        public Weapon(Equipment equipment, WeaponType type, WeaponAttributeType weaponAttributeType)
-            : base(equipment)
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Weapon
+        /// 作者：taixihuase
+        /// 作用：通过数据库中获得的数据构造武器装备实例
+        /// 编写日期：2015/8/16
+        /// </summary>
+        /// <param name="fixedId"></param>
+        /// <param name="allocatedId"></param>
+        /// <param name="name"></param>
+        /// <param name="occupation"></param>
+        /// <param name="limit"></param>
+        /// <param name="cur"></param>
+        /// <param name="dur"></param>
+        /// <param name="type"></param>
+        /// <param name="weaponAttributeType"></param>
+        public Weapon(int fixedId, int allocatedId, string name, OccupationCode occupation, int limit, int cur, int dur,
+            WeaponType type, WeaponAttributeType weaponAttributeType)
+            : base(fixedId, allocatedId, name, occupation, limit, cur, dur, EquipmentType.Weapon)
         {
             Type = (byte) type;
             WeaponAttribute = weaponAttributeType;
-  
+
             if (weaponAttributeType == WeaponAttributeType.Both)
             {
                 AttackLimit = new Dictionary<WeaponAttributeType, KeyValuePair<int, int>>
@@ -102,6 +133,13 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             };
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Weapon
+        /// 作者：taixihuase
+        /// 作用：构造空的武器装备实例
+        /// 编写日期：2015/8/16
+        /// </summary>
         public Weapon()
         {
             Type = (byte) WeaponType.Null;
@@ -117,19 +155,38 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             };
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：UpdateAttackLimit
+        /// 作者：taixihuase
+        /// 作用：变更武器攻击上下限
+        /// 编写日期：2015/8/16
+        /// </summary>
+        /// <param name="physicalMin"></param>
+        /// <param name="physicalMax"></param>
+        /// <param name="magicMin"></param>
+        /// <param name="magicMax"></param>
         public void UpdateAttackLimit(int? physicalMin, int? physicalMax, int? magicMin, int? magicMax)
         {
             if (physicalMin.HasValue && physicalMax.HasValue)
             {
-                AttackLimit[WeaponAttributeType.Physical] = new KeyValuePair<int, int>(physicalMin.Value,
-                    physicalMax.Value);
+                if (AttackLimit.ContainsKey(WeaponAttributeType.Physical))
+                {
+                    AttackLimit[WeaponAttributeType.Physical] = new KeyValuePair<int, int>(physicalMin.Value,
+                        physicalMax.Value);
+                }
             }
             if (magicMin.HasValue && magicMax.HasValue)
             {
-                AttackLimit[WeaponAttributeType.Magic] = new KeyValuePair<int, int>(magicMin.Value,
-                    magicMax.Value);
+                if (AttackLimit.ContainsKey(WeaponAttributeType.Magic))
+                {
+                    AttackLimit[WeaponAttributeType.Magic] = new KeyValuePair<int, int>(magicMin.Value,
+                        magicMax.Value);
+                }
             }
         }
+
+        #region IEquipment接口实现
 
         public void UpdateForgingAttribute(int level, AttributeCode attribute, float value)
         {
@@ -170,6 +227,11 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                 CurrentLevel--;
             }
         }
+
+        #endregion
+
+        #region 重载抽象基类方法
+
         public override void Apply(Character.Character character)
         {
             base.Apply(character);
@@ -219,5 +281,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             }
             CalculateCharacterAttributes(character);
         }
+
+        #endregion
     }
 }

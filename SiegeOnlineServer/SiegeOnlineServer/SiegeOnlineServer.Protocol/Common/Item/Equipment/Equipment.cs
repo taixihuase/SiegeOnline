@@ -35,24 +35,31 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
     /// 编写日期：2015/8/16
     /// </summary>
     [Serializable]
-    public class Equipment : IItem
+    public abstract class Equipment : IItem
     {
         public int FixedId { get; protected set; } // 数据库固定编号
 
         public int AllocatedId { get; protected set; } // 动态分配编号
 
-        public string Name { get; protected set; }
+        public string Name { get; protected set; } // 名称
 
-        public byte Occupation { get; protected set; }
+        public byte Occupation { get; protected set; } // 职业需求
 
-        public int LevelLimit { get; protected set; }
+        public int LevelLimit { get; protected set; } // 等级需求
 
-        public int CurrentLevel { get; set; }
+        public int CurrentLevel { get; set; } // 装备锻造等级
 
-        public int Durability { get; set; }
+        public int Durability { get; set; } // 耐久度
 
         #region 装备类型
 
+        /// <summary>
+        /// 类型：枚举
+        /// 名称：EquipmentType
+        /// 作者：taixihuase
+        /// 作用：装备类型枚举
+        /// 编写日期：2015/8/16
+        /// </summary>
         [Serializable]
         public enum EquipmentType : byte
         {
@@ -62,15 +69,30 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             Weapon
         }
 
-        public byte EquipType { get; protected set; }
+        public byte EquipType { get; protected set; } // 装备类型
 
         #endregion
 
         public List<KeyValuePair<AttributeCode, float>> FixedAttributes; // 固定属性（多条）
         public KeyValuePair<AttributeCode, float> RandomAttribute; // 随机属性（单条）
 
-        public Equipment(int @fixed, int allocated, string name, OccupationCode occupation, int limit, int cur,
-            EquipmentType type)
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Equipment
+        /// 作者：taixihuase
+        /// 作用：通过数据库中获得的数据构造实例，只能由子类调用
+        /// 编写日期：2015/8/16
+        /// </summary>
+        /// <param name="fixed"></param>
+        /// <param name="allocated"></param>
+        /// <param name="name"></param>
+        /// <param name="occupation"></param>
+        /// <param name="limit"></param>
+        /// <param name="cur"></param>
+        /// <param name="durability"></param>
+        /// <param name="type"></param>
+        protected Equipment(int @fixed, int allocated, string name, OccupationCode occupation, int limit, int cur,
+            int durability, EquipmentType type)
         {
             FixedId = @fixed;
             AllocatedId = allocated;
@@ -78,6 +100,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             Occupation = (byte) occupation;
             LevelLimit = limit;
             CurrentLevel = cur;
+            Durability = durability;
             EquipType = (byte) type;
             FixedAttributes = new List<KeyValuePair<AttributeCode, float>>
             {
@@ -86,20 +109,14 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             RandomAttribute = new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0);
         }
 
-        public Equipment(Equipment equipment)
-        {
-            FixedId = equipment.FixedId;
-            AllocatedId = equipment.AllocatedId;
-            Name = equipment.Name;
-            Occupation = equipment.Occupation;
-            LevelLimit = equipment.LevelLimit;
-            CurrentLevel = equipment.CurrentLevel;
-            EquipType = equipment.EquipType;
-            FixedAttributes = equipment.FixedAttributes;
-            RandomAttribute = equipment.RandomAttribute;
-        }
-
-        public Equipment()
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Equipment
+        /// 作者：taixihuase
+        /// 作用：构造一个空的实例，只能由子类调用
+        /// 编写日期：2015/8/16
+        /// </summary>
+        protected Equipment()
         {
             FixedId = 0;
             AllocatedId = 0;
@@ -107,6 +124,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             Occupation = (byte) OccupationCode.Common;
             LevelLimit = 0;
             CurrentLevel = 0;
+            Durability = DataConstraint.EquipmentMaxDurability;
             EquipType = (byte) EquipmentType.Null;
             FixedAttributes = new List<KeyValuePair<AttributeCode, float>>
             {
@@ -114,6 +132,8 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             };
             RandomAttribute = new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0);
         }
+
+        #region IItem接口实现
 
         public virtual void Apply(Character.Character character)
         {
@@ -133,6 +153,15 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             CalculateCharacterAttributes(character);
         }
 
+        #endregion
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Repair
+        /// 作者：taixihuase
+        /// 作用：修复装备的耐久度至最大值
+        /// 编写日期：2015/8/19
+        /// </summary>
         public void Repair()
         {
             if (Durability < DataConstraint.EquipmentMaxDurability)
@@ -141,6 +170,14 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             }
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Abrase
+        /// 作者：taixihuase
+        /// 作用：使装备遭受磨损，降低耐久度
+        /// 编写日期：2015/8/19
+        /// </summary>
+        /// <param name="value"></param>
         public void Abrase(int value)
         {
             Durability -= value;
@@ -150,6 +187,16 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             }
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：UpdateCharacterAttribute
+        /// 作者：taixihuase
+        /// 作用：更新一条装备属性对角色属性的作用效果
+        /// 编写日期：2015/8/19
+        /// </summary>
+        /// <param name="character"></param>
+        /// <param name="attribute"></param>
+        /// <param name="activated"></param>
         protected void UpdateCharacterAttribute(Character.Character character,
             KeyValuePair<AttributeCode, float> attribute,
             bool activated)
@@ -389,6 +436,14 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             }
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：CalculateCharacterAttributes
+        /// 作者：taixihuase
+        /// 作用：重新计算角色的最终属性
+        /// 编写日期：2015/8/19
+        /// </summary>
+        /// <param name="character"></param>
         protected void CalculateCharacterAttributes(Character.Character character)
         {
             character.Attribute.AttackPhysical[0] = (int)
