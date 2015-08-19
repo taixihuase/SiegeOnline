@@ -20,6 +20,8 @@
 //----------------------------------------------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
+
 // ReSharper disable InconsistentNaming
 
 namespace SiegeOnlineServer.Protocol.Common
@@ -36,8 +38,13 @@ namespace SiegeOnlineServer.Protocol.Common
     public enum OccupationCode : byte
     {
         Common      =   0,
+        [Description("法师")]
         Mage        =   1,
+        [Description("骑士")]
         Paladin     =   2,
+        [Description("战士")]
         Warrior     =   4,
+        [Description("巫师")]
+        Wizard =   8,
     }
 }

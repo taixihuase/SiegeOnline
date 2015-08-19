@@ -163,7 +163,7 @@ namespace SiegeOnlineServer.Collection
             {
                 UniqueIdToCharacter.Add(character.UniqueId, character);
                 AddGamingCharacter(Server.Users.TryGetPeer(character.Guid));
-                character.Attribute.WorldEnterTime = DateTime.Now;
+                character.WorldEnterTime = DateTime.Now;
             }
         }
 

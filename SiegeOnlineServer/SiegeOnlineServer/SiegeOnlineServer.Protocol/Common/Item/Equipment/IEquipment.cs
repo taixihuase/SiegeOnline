@@ -8,7 +8,7 @@
 //
 // 提供给可锻造装备的接口，用于升降级别
 //
-// 创建标识：taixihuase 20150723
+// 创建标识：taixihuase 20150816
 //
 // 修改标识：
 // 修改描述：
@@ -30,9 +30,9 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
     /// </summary>
     interface IEquipment
     {
-        void UpdateForgingAttribute(int level, AttributeCode attribute, int value);
+        void UpdateForgingAttribute(int level, AttributeCode attribute, float value);
 
-        void UpgradeForgingAttribute(AttributeCode attribute, int value);
+        void UpgradeForgingAttribute(AttributeCode attribute, float value);
 
         void DegradeForgingAttribute();
 

@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 // ReSharper disable InconsistentNaming
 
@@ -65,7 +64,15 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         #endregion
 
-        public Dictionary<int, KeyValuePair<AttributeCode, int>> ForgingAttributes;             // 锻造附加属性
+        #region 其余武器固有属性
+
+        public int FixedAttackSpeed { get; protected set; }                                     // 武器攻击速度
+
+        public int FixedAttackDistance { get; protected set; }                                  // 武器攻击射程
+
+        #endregion
+
+        public Dictionary<int, KeyValuePair<AttributeCode, float>> ForgingAttributes;           // 锻造附加属性
 
         public Weapon(Equipment equipment, WeaponType type, WeaponAttributeType weaponAttributeType)
             : base(equipment)
@@ -89,9 +96,9 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                 };
             }
 
-            ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, int>>
+            ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, float>>
             {
-                {-1, new KeyValuePair<AttributeCode, int>(AttributeCode.Null, 0)}
+                {-1, new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0)}
             };
         }
 
@@ -104,9 +111,9 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                 [WeaponAttributeType.Magic] = new KeyValuePair<int, int>(0, 0),
                 [WeaponAttributeType.Physical] = new KeyValuePair<int, int>(0, 0)
             };
-            ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, int>>
+            ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, float>>
             {
-                {-1, new KeyValuePair<AttributeCode, int>(AttributeCode.Null, 0)}
+                {-1, new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0)}
             };
         }
 
@@ -124,19 +131,19 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             }
         }
 
-        public void UpdateForgingAttribute(int level, AttributeCode attribute, int value)
+        public void UpdateForgingAttribute(int level, AttributeCode attribute, float value)
         {
             if (ForgingAttributes.ContainsKey(level))
             {
-                ForgingAttributes[level] = new KeyValuePair<AttributeCode, int>(attribute, value);
+                ForgingAttributes[level] = new KeyValuePair<AttributeCode, float>(attribute, value);
             }
         }
 
-        public void UpgradeForgingAttribute(AttributeCode attribute, int value)
+        public void UpgradeForgingAttribute(AttributeCode attribute, float value)
         {
             if (CurrentLevel < 10)
             {
-                ForgingAttributes[CurrentLevel + 1] = new KeyValuePair<AttributeCode, int>(attribute, value);
+                ForgingAttributes[CurrentLevel + 1] = new KeyValuePair<AttributeCode, float>(attribute, value);
             }
         }
 
@@ -150,7 +157,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         public void UpgradeCurrentLevel()
         {
-            if (CurrentLevel < MaxLevel)
+            if (CurrentLevel < DataConstraint.EquipmentMaxLevel)
             {
                 CurrentLevel++;
             }
@@ -162,6 +169,55 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             {
                 CurrentLevel--;
             }
+        }
+        public override void Apply(Character.Character character)
+        {
+            base.Apply(character);
+            character.Attribute.AttackSpeed = FixedAttackSpeed;
+            character.Attribute.AttackDistance = FixedAttackDistance;
+            if (AttackLimit.ContainsKey(WeaponAttributeType.Physical))
+            {
+                character.Attribute.AttackPhysical[1] += AttackLimit[WeaponAttributeType.Physical].Key;
+                character.Attribute.AttackPhysical[2] += AttackLimit[WeaponAttributeType.Physical].Value;
+            }
+            if (AttackLimit.ContainsKey(WeaponAttributeType.Magic))
+            {
+                character.Attribute.AttackMagic[1] += AttackLimit[WeaponAttributeType.Magic].Key;
+                character.Attribute.AttackMagic[2] += AttackLimit[WeaponAttributeType.Magic].Value;
+            }
+            foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
+            {
+                if (attribute.Key > 0)
+                {
+                    UpdateCharacterAttribute(character, attribute.Value, true);
+                }
+            }
+            CalculateCharacterAttributes(character);
+        }
+
+        public override void Cancel(Character.Character character)
+        {
+            base.Cancel(character);
+            character.Attribute.AttackSpeed = DataConstraint.CharacterDefaultAttackSpeed;
+            character.Attribute.AttackDistance = DataConstraint.CharacterDefaultAttackDistance;
+            if (AttackLimit.ContainsKey(WeaponAttributeType.Physical))
+            {
+                character.Attribute.AttackPhysical[1] -= AttackLimit[WeaponAttributeType.Physical].Key;
+                character.Attribute.AttackPhysical[2] -= AttackLimit[WeaponAttributeType.Physical].Value;
+            }
+            if (AttackLimit.ContainsKey(WeaponAttributeType.Magic))
+            {
+                character.Attribute.AttackMagic[1] -= AttackLimit[WeaponAttributeType.Magic].Key;
+                character.Attribute.AttackMagic[2] -= AttackLimit[WeaponAttributeType.Magic].Value;
+            }
+            foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
+            {
+                if (attribute.Key > 0)
+                {
+                    UpdateCharacterAttribute(character, attribute.Value, false);
+                }
+            }
+            CalculateCharacterAttributes(character);
         }
     }
 }

@@ -62,7 +62,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         public JewelAttributeType JewelAttribute { get; protected set; }
 
-        public KeyValuePair<JewelAttributeType, int> SpecialAttribute;
+        public KeyValuePair<JewelAttributeType, float> SpecialAttribute;
 
         #endregion
 
@@ -71,25 +71,21 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         {
             Type = (byte) type;
             JewelAttribute = jewelAttributeType;
-            SpecialAttribute = new KeyValuePair<JewelAttributeType, int>(jewelAttributeType, 0);
+            SpecialAttribute = new KeyValuePair<JewelAttributeType, float>(jewelAttributeType, 0);
         }
 
         public Jewel()
         {
             Type = (byte) JewelType.Null;
             JewelAttribute = JewelAttributeType.Null;
-            SpecialAttribute = new KeyValuePair<JewelAttributeType, int>(JewelAttributeType.Null, 0);
+            SpecialAttribute = new KeyValuePair<JewelAttributeType, float>(JewelAttributeType.Null, 0);
         }
 
-        public void UpdateSpecialAttribute(int value)
+        public void UpdateSpecialAttribute(float value)
         {
             if (value > 0)
             {
-                SpecialAttribute = new KeyValuePair<JewelAttributeType, int>(JewelAttribute, value);
-            }
-            else
-            {
-                return;
+                SpecialAttribute = new KeyValuePair<JewelAttributeType, float>(JewelAttribute, value);
             }
         }
 

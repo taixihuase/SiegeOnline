@@ -55,21 +55,20 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         public int[] DefensePoints { get; set; }
 
-        public Dictionary<int, KeyValuePair<AttributeCode, int>> ForgingAttributes; // 锻造附加属性
+        public Dictionary<int, KeyValuePair<AttributeCode, float>> ForgingAttributes; // 锻造附加属性
 
-        public Armor(int fixedId, int allocatedId, string name, int limit, int max, int cur, ArmorType type)
+        public Armor(int fixedId, int allocatedId, string name, int limit, int cur, ArmorType type)
         {
             FixedId = fixedId;
             AllocatedId = allocatedId;
             Name = name;
             LevelLimit = limit;
-            MaxLevel = max;
             CurrentLevel = cur;
             Type = (byte) type;
             DefensePoints = new[] {0, 0};
-            ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, int>>
+            ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, float>>
             {
-                {-1, new KeyValuePair<AttributeCode, int>(AttributeCode.Null, 0)}
+                {-1, new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0)}
             };
         }
 
@@ -79,12 +78,11 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             AllocatedId = 0;
             Name = "";
             LevelLimit = 0;
-            MaxLevel = 0;
             CurrentLevel = 0;
             DefensePoints = new[] {0, 0};
-            ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, int>>
+            ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, float>>
             {
-                {-1, new KeyValuePair<AttributeCode, int>(AttributeCode.Null, 0)}
+                {-1, new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0)}
             };
         }
 
@@ -97,19 +95,19 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             }
         }
 
-        public void UpdateForgingAttribute(int level, AttributeCode attribute, int value)
+        public void UpdateForgingAttribute(int level, AttributeCode attribute, float value)
         {
             if (ForgingAttributes.ContainsKey(level))
             {
-                ForgingAttributes[level] = new KeyValuePair<AttributeCode, int>(attribute, value);
+                ForgingAttributes[level] = new KeyValuePair<AttributeCode, float>(attribute, value);
             }
         }
 
-        public void UpgradeForgingAttribute(AttributeCode attribute, int value)
+        public void UpgradeForgingAttribute(AttributeCode attribute, float value)
         {
             if (CurrentLevel < 10)
             {
-                ForgingAttributes[CurrentLevel + 1] = new KeyValuePair<AttributeCode, int>(attribute, value);
+                ForgingAttributes[CurrentLevel + 1] = new KeyValuePair<AttributeCode, float>(attribute, value);
             }
         }
 
@@ -123,7 +121,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         public void UpgradeCurrentLevel()
         {
-            if (CurrentLevel < MaxLevel)
+            if (CurrentLevel < DataConstraint.EquipmentMaxLevel)
             {
                 CurrentLevel++;
             }
@@ -135,6 +133,36 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             {
                 CurrentLevel--;
             }
+        }
+
+        public override void Apply(Character.Character character)
+        {
+            base.Apply(character);
+            character.Attribute.DefensePhysical[1] += DefensePoints[0];
+            character.Attribute.DefenseMagic[1] += DefensePoints[1];
+            foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
+            {
+                if (attribute.Key > 0)
+                {
+                    UpdateCharacterAttribute(character, attribute.Value, true);
+                }
+            }
+            CalculateCharacterAttributes(character);
+        }
+
+        public override void Cancel(Character.Character character)
+        {
+            base.Cancel(character);
+            character.Attribute.DefensePhysical[1] -= DefensePoints[0];
+            character.Attribute.DefenseMagic[1] -= DefensePoints[1];
+            foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
+            {
+                if (attribute.Key > 0)
+                {
+                    UpdateCharacterAttribute(character, attribute.Value, false);
+                }
+            }
+            CalculateCharacterAttributes(character);
         }
     }
 }

@@ -70,7 +70,7 @@ namespace SiegeOnlineServer.ServerLogic
 
             peer.Server.Players.CharacterEnter(ref character);
             peer.Server.Data.CharacterData.GetCharacterPositionFromDatabase(ref character);
-            character.Attribute.WorldEnterTime = DateTime.Now;
+            character.WorldEnterTime = DateTime.Now;
 
             // 返回数据给客户端
 

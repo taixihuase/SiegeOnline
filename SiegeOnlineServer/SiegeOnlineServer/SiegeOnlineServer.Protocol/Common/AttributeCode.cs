@@ -20,6 +20,7 @@
 //----------------------------------------------------------------------------------------------------------
 
 using System;
+
 // ReSharper disable InconsistentNaming
 
 namespace SiegeOnlineServer.Protocol.Common
@@ -83,7 +84,7 @@ namespace SiegeOnlineServer.Protocol.Common
 
         // 命中率加成(百分比)
         Hit_Both,
-        Hit_Magic,
+        Hit_Magic, 
         Hit_Physical,
 
         // 闪避率加成(百分比)
@@ -106,17 +107,13 @@ namespace SiegeOnlineServer.Protocol.Common
         Life_Increase,
         Life_Increase_Percent,
         Life_Recovery,
-        Life_Recovery_Percent,
         Life_Steal,
-        Life_Steal_Percent,
 
         // 能量加成
         Mana_Increase,
         Mana_Increase_Percent,
         Mana_Recovery,
-        Mana_Recovery_Percent,
         Mana_Steal,
-        Mana_Steal_Percent,
 
         // 潜能点加成
         Attr_Strength,

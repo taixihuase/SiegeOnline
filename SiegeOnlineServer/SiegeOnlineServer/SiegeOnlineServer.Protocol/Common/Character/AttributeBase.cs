@@ -33,13 +33,9 @@ namespace SiegeOnlineServer.Protocol.Common.Character
     [Serializable]
     public class AttributeBase
     {
-        public int Level { get; set; } // 等级
+        public int Level { get; set; }                          // 等级
 
-        public int HitPoint { get; set; } // 生命值
-
-        public int Mana { get; set; } // 法力值
-
-        public Position Position { get; set; } // 位置信息
+        public Position Position { get; set; }                  // 位置信息
 
         /// <summary>
         /// 类型：方法
@@ -54,15 +50,11 @@ namespace SiegeOnlineServer.Protocol.Common.Character
             if (attribute != null)
             {
                 Level = attribute.Level;
-                HitPoint = attribute.HitPoint;
-                Mana = attribute.Mana;
                 Position = attribute.Position;
             }
             else
             {
                 Level = 1;
-                HitPoint = 1;
-                Mana = 0;
                 Position = new Position();
                 Position.SetBirthplace();
             }
@@ -79,8 +71,6 @@ namespace SiegeOnlineServer.Protocol.Common.Character
         public void SetBirthAttribute(Occupation occupation)
         {
             Level = 1;
-            HitPoint = occupation.BaseHitPoint;
-            Mana = occupation.BaseMana;
         }
     }
 }
