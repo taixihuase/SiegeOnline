@@ -90,7 +90,13 @@ namespace SiegeOnlineServer.Collection
             // 回传字串
             public StringBuilder DebugMessage { get; set; }
 
-            // 回传码枚举值
+            /// <summary>
+            /// 类型：枚举
+            /// 名称：ReturnCodeTypes
+            /// 作者：taixihuase
+            /// 作用：登录操作回传码枚举值
+            /// 编写日期：2015/7/12
+            /// </summary>
             [Serializable]
             public enum ReturnCodeTypes : byte
             {

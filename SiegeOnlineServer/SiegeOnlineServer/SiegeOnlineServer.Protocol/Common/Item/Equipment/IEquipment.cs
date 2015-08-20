@@ -32,52 +32,22 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
     {
         /// <summary>
         /// 类型：方法
-        /// 名称：UpdateForgingAttribute
-        /// 作者：taixihuase
-        /// 作用：变更一条锻造属性
-        /// 编写日期：2015/8/16
-        /// </summary>
-        /// <param name="level"></param>
-        /// <param name="attribute"></param>
-        /// <param name="value"></param>
-        void UpdateForgingAttribute(int level, AttributeCode attribute, float value);
-
-        /// <summary>
-        /// 类型：方法
-        /// 名称：UpgradeForgingAttribute
-        /// 作者：taixihuase
-        /// 作用：添加一条更高一级锻造等级的锻造属性
-        /// 编写日期：2015/8/16
-        /// </summary>
-        /// <param name="attribute"></param>
-        /// <param name="value"></param>
-        void UpgradeForgingAttribute(AttributeCode attribute, float value);
-
-        /// <summary>
-        /// 类型：方法
-        /// 名称：DegradeForgingAttribute
-        /// 作者：taixihuase
-        /// 作用：去除一条当前锻造等级的锻造属性
-        /// 编写日期：2015/8/16
-        /// </summary>
-        void DegradeForgingAttribute();
-
-        /// <summary>
-        /// 类型：方法
-        /// 名称：UpgradeCurrentLevel
+        /// 名称：Upgrade
         /// 作者：taixihuase
         /// 作用：装备等级提升
         /// 编写日期：2015/8/16
+        /// <param name="attribute"></param>
+        /// <param name="value"></param>
         /// </summary>
-        void UpgradeCurrentLevel();
+        void Upgrade(AttributeCode attribute = AttributeCode.Null, float value = 0);
 
         /// <summary>
         /// 类型：方法
-        /// 名称：DegradeCurrentLevel
+        /// 名称：Degrade
         /// 作者：taixihuase
         /// 作用：装备等级下降
         /// 编写日期：2015/8/16
         /// </summary>
-        void DegradeCurrentLevel();
+        void Degrade();
     }
 }

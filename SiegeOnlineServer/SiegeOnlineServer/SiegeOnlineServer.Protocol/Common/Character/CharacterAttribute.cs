@@ -27,11 +27,11 @@ namespace SiegeOnlineServer.Protocol.Common.Character
     /// 类型：类
     /// 名称：CharacterAttribute
     /// 作者：taixihuase
-    /// 作用：角色属性拓展类
+    /// 作用：角色属性类
     /// 编写日期：2015/7/23
     /// </summary>
     [Serializable]
-    public class CharacterAttribute : AttributeBase
+    public class CharacterAttribute
     {
         #region 潜能点
 
@@ -185,7 +185,14 @@ namespace SiegeOnlineServer.Protocol.Common.Character
 
         #endregion
 
-        public CharacterAttribute(AttributeBase attribute = null) : base(attribute)
+        /// <summary>
+        /// 类型：方法
+        /// 名称：CharacterrAttribute
+        /// 作者：taixihuase
+        /// 作用：构造一个默认的角色属性实例
+        /// 编写日期：2015/7/23
+        /// </summary>
+        public CharacterAttribute()
         {
             AttackMagic = new int[3];
             AttackPhysical = new int[3];

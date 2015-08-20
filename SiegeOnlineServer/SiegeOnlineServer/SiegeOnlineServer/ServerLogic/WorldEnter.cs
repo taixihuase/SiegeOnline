@@ -19,7 +19,6 @@
 //
 //-----------------------------------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using Photon.SocketServer;
 using SiegeOnlineServer.Protocol;
@@ -65,12 +64,11 @@ namespace SiegeOnlineServer.ServerLogic
         {
             ServerPeer.Log.Debug("Entering");
 
-            Character character = (Character)
+            Character characterBase = (Character)
                 Serialization.Deserialize(operationRequest.Parameters[(byte) ParameterCode.WorldEnter]);
 
-            peer.Server.Players.CharacterEnter(ref character);
+            Character character = peer.Server.Players.CharacterEnter(characterBase);
             peer.Server.Data.CharacterData.GetCharacterPositionFromDatabase(ref character);
-            character.WorldEnterTime = DateTime.Now;
 
             // 返回数据给客户端
 

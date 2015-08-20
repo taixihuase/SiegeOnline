@@ -155,8 +155,8 @@ namespace SiegeOnlineServer.ServerLogic
                                      Enum.GetName(typeof (UserCollection.UserReturn.ReturnCodeTypes),
                                          userReturn.ReturnCode));
             }
-        }
 
-        #endregion
+            #endregion
+        }
     }
 }

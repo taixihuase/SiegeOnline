@@ -38,7 +38,8 @@ namespace SiegeOnlineServer.Protocol.Common.Item
         /// 编写日期：2015/8/19
         /// </summary>
         /// <param name="character"></param>
-        void Apply(Character.Character character);
+        /// <returns></returns>
+        bool Apply(Character.Character character);
 
         /// <summary>
         /// 类型：方法
@@ -48,6 +49,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item
         /// 编写日期：2015/8/19
         /// </summary>
         /// <param name="character"></param>
-        void Cancel(Character.Character character);
+        /// <returns></returns>
+        bool Cancel(Character.Character character);
     }
 }

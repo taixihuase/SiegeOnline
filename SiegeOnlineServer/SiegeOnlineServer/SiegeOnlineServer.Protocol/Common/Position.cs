@@ -33,6 +33,13 @@ namespace SiegeOnlineServer.Protocol.Common
     [Serializable]
     public class Position
     {
+        /// <summary>
+        /// 类型：枚举
+        /// 名称：MapCode
+        /// 作者：taixihuase
+        /// 作用：地图编号
+        /// 编写日期：2015/8/16
+        /// </summary>
         [Serializable]
         public enum MapCode : byte
         {
@@ -49,6 +56,18 @@ namespace SiegeOnlineServer.Protocol.Common
 
         public float Direction { get; set; } // 朝向
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Position
+        /// 作者：taixihuase
+        /// 作用：构造一个位置信息类实例
+        /// 编写日期：2015/8/16
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        /// <param name="dir"></param>
+        /// <param name="map"></param>
         public Position(float x = 0, float y = 0, float z = 0, float dir = 0, MapCode map = MapCode.World)
         {
             X = x;
@@ -58,11 +77,29 @@ namespace SiegeOnlineServer.Protocol.Common
             Map = (byte) map;
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：SetMap
+        /// 作者：taixihuase
+        /// 作用：设置地图编号
+        /// 编写日期：2015/8/16
+        /// </summary>
+        /// <param name="map"></param>
         public void SetMap(MapCode map)
         {
             Map = (byte) map;
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：SetPosition
+        /// 作者：taixihuase
+        /// 作用：设置坐标
+        /// 编写日期：2015/8/16
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
         public void SetPosition(float x, float y, float z)
         {
             X = x;
@@ -70,19 +107,21 @@ namespace SiegeOnlineServer.Protocol.Common
             Z = z;
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：SetPosition
+        /// 作者：taixihuase
+        /// 作用：设置坐标及正面朝向
+        /// 编写日期：2015/8/16
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        /// <param name="dir"></param>
         public void SetPosition(float x, float y, float z, float dir)
         {
             SetPosition(x, y, z);
             Direction = dir;
-        }
-
-        public void SetBirthplace()
-        {
-            X = 0;
-            Y = 0;
-            Z = 0;
-            Direction = 0;
-            Map = (byte) MapCode.World;
         }
     }
 }

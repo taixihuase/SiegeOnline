@@ -33,19 +33,93 @@ namespace SiegeOnlineServer.Protocol.Common.Character
     [Serializable]
     public class Occupation
     {
-        public string Name { get; set; } // 职业名
+        public OccupationCode Type { get; protected set; } // 职业代码
+
+        public string Name { get; protected set; } // 职业名
 
         public int BaseHitPoint { get; set; } // 基础生命值
 
         public int BaseMana { get; set; } // 基础法力值
 
-        public int BaseAttack { get; set; } // 基础攻击力
+        public int BaseLifeRecovery { get; set; } // 基础生命恢复速度
 
-        public int BaseDefense { get; set; } // 基础防御力
+        public int BaseManaRecovery { get; set; } // 基础法力恢复速度
 
-        public Occupation(string name = "")
+        private bool _apply; // 启用属性
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Occupation
+        /// 作者：taixihuase
+        /// 作用：构造默认职业类
+        /// 编写日期：2015/8/20
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="name"></param>
+        public Occupation(OccupationCode code = OccupationCode.Common, string name = "")
         {
+            Type = code;
             Name = name;
+            _apply = false;
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：UpdateOccupation
+        /// 作者：taixihuase
+        /// 作用：变更职业类型
+        /// 编写日期：2015/8/20
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="name"></param>
+        public void UpdateOccupation(OccupationCode code, string name)
+        {
+            Type = code;
+            Name = name;
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Apply
+        /// 作者：taixihuase
+        /// 作用：启用职业基础属性值
+        /// 编写日期：2015/8/20
+        /// </summary>
+        /// <param name="attribute"></param>
+        public void Apply(CharacterAttribute attribute)
+        {
+            if (!_apply)
+            {
+                attribute.HitPoint[1] += BaseHitPoint;
+                attribute.HitPoint[0] = (int) (attribute.HitPoint[1]*(100 + attribute.LifeIncreasePercent)*0.01);
+                attribute.Mana[1] += BaseMana;
+                attribute.Mana[0] = (int) (attribute.Mana[1]*(100 + attribute.ManaIncreasePercent)*0.01);
+                attribute.LifeRecovery += BaseLifeRecovery;
+                attribute.ManaRecovery += BaseManaRecovery;
+                _apply = true;
+            }
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Cancel
+        /// 作者：taixihuase
+        /// 作用：禁用职业基础属性值
+        /// 编写日期：2015/8/20
+        /// </summary>
+        /// <param name="attribute"></param>
+        public void Cancel(CharacterAttribute attribute)
+        {
+            if (_apply)
+            {
+                attribute.HitPoint[1] -= BaseHitPoint;
+                attribute.HitPoint[0] = (int) (attribute.HitPoint[1]*(100 + attribute.LifeIncreasePercent)*0.01);
+                attribute.Mana[1] -= BaseMana;
+                attribute.Mana[0] = (int) (attribute.Mana[1]*(100 + attribute.ManaIncreasePercent)*0.01);
+                attribute.LifeRecovery -= BaseLifeRecovery;
+                attribute.ManaRecovery -= BaseManaRecovery;
+                _apply = false;
+            }
         }
     }
 }

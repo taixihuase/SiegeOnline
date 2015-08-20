@@ -51,6 +51,8 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         public int Durability { get; set; } // 耐久度
 
+        public bool Using { get; set; } // 是否正在穿戴
+
         #region 装备类型
 
         /// <summary>
@@ -101,6 +103,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             LevelLimit = limit;
             CurrentLevel = cur;
             Durability = durability;
+            Using = false;
             EquipType = (byte) type;
             FixedAttributes = new List<KeyValuePair<AttributeCode, float>>
             {
@@ -125,6 +128,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             LevelLimit = 0;
             CurrentLevel = 0;
             Durability = DataConstraint.EquipmentMaxDurability;
+            Using = false;
             EquipType = (byte) EquipmentType.Null;
             FixedAttributes = new List<KeyValuePair<AttributeCode, float>>
             {
@@ -135,25 +139,69 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         #region IItem接口实现
 
-        public virtual void Apply(Character.Character character)
+        public virtual bool Apply(Character.Character character)
         {
-            foreach (KeyValuePair<AttributeCode, float> fixedAttribute in FixedAttributes)
+            if (!Using)
             {
-                UpdateCharacterAttribute(character, fixedAttribute, true);
+                foreach (KeyValuePair<AttributeCode, float> fixedAttribute in FixedAttributes)
+                {
+                    UpdateCharacterAttribute(character, fixedAttribute, true);
+                }
+                CalculateCharacterAttributes(character);
+                Using = true;
+                return true;
             }
-            CalculateCharacterAttributes(character);
+            return false;
         }
 
-        public virtual void Cancel(Character.Character character)
+        public virtual bool Cancel(Character.Character character)
         {
-            foreach (KeyValuePair<AttributeCode, float> fixedAttribute in FixedAttributes)
+            if (Using)
             {
-                UpdateCharacterAttribute(character, fixedAttribute, false);
+                foreach (KeyValuePair<AttributeCode, float> fixedAttribute in FixedAttributes)
+                {
+                    UpdateCharacterAttribute(character, fixedAttribute, false);
+                }
+                CalculateCharacterAttributes(character);
+                Using = false;
+                return true;
             }
-            CalculateCharacterAttributes(character);
+            return false;
         }
 
         #endregion
+
+        #region 装备通用接口
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：AddFixedAttribute
+        /// 作者：taixihuase
+        /// 作用：添加一条固定属性
+        /// 编写日期：2015/8/20
+        /// </summary>
+        /// <param name="attribute"></param>
+        /// <param name="value"></param>
+        public void AddFixedAttribute(AttributeCode attribute, float value)
+        {
+            if (!FixedAttributes.Exists(x => x.Key.Equals(attribute)))
+            {
+                FixedAttributes.Add(new KeyValuePair<AttributeCode, float>(attribute, value));
+            }
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：RemoveFixedAttribute
+        /// 作者：taixihuase
+        /// 作用：移除一条固定属性
+        /// 编写日期：2015/8/20
+        /// </summary>
+        /// <param name="attribute"></param>
+        public void RemoveFixedAttribute(AttributeCode attribute)
+        {
+            FixedAttributes.RemoveAll(x => x.Key.Equals(attribute));
+        }
 
         /// <summary>
         /// 类型：方法
@@ -472,5 +520,79 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             character.Attribute.ExperienceGainSpeed = DataConstraint.CharacterDefaultExperienceGainSpeed +
                                                       character.Attribute.SpeedExperience;
         }
+
+        #endregion
+
+        #region 与锻造相关的接口
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：UpdateForgingAttribute
+        /// 作者：taixihuase
+        /// 作用：变更一条锻造属性
+        /// 编写日期：2015/8/16
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="attribute"></param>
+        /// <param name="value"></param>
+        protected virtual void UpdateForgingAttribute(int level, AttributeCode attribute, float value)
+        {
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：UpgradeForgingAttribute
+        /// 作者：taixihuase
+        /// 作用：添加一条更高一级锻造等级的锻造属性，只能在调用 UpgradeCurrentLevel 前使用
+        /// 编写日期：2015/8/16
+        /// </summary>
+        /// <param name="attribute"></param>
+        /// <param name="value"></param>
+        protected virtual void UpgradeForgingAttribute(AttributeCode attribute, float value)
+        {
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：DegradeForgingAttribute
+        /// 作者：taixihuase
+        /// 作用：去除一条当前锻造等级的锻造属性，只能在调用 DegradeCurrentLevel 前使用
+        /// 编写日期：2015/8/16
+        /// </summary>
+        protected virtual void DegradeForgingAttribute()
+        {
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：UpgradeCurrentLevel
+        /// 作者：taixihuase
+        /// 作用：提升锻造等级
+        /// 编写日期：2015/8/20
+        /// </summary>
+        protected void UpgradeCurrentLevel()
+        {
+            if (CurrentLevel < DataConstraint.EquipmentMaxLevel)
+            {
+                CurrentLevel++;
+            }
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：DegradeCurrentLevel
+        /// 作者：taixihuase
+        /// 作用：提升锻造等级
+        /// 编写日期：2015/8/20
+        /// </summary>
+        protected void DegradeCurrentLevel()
+        {
+            if (CurrentLevel > 0)
+            {
+                CurrentLevel--;
+            }
+        }
+
+        #endregion
     }
 }

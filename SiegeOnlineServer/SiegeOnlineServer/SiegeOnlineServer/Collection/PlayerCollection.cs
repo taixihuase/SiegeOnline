@@ -38,8 +38,11 @@ namespace SiegeOnlineServer.Collection
         // 正在进行游戏的客户端列表
         public List<ServerPeer> GamingClients { get; set; }
 
-        // 从编号获得角色信息
-        protected Dictionary<int, Character> UniqueIdToCharacter { get; set; }
+        // 从编号获得角色初始信息
+        protected Dictionary<int, Character> UniqueIdToCharacterOriginal { get; set; }
+
+        // 从编号获得角色加成信息
+        protected Dictionary<int, Character>  UniqueIdToCharacterCopy { get; set; }
 
         // 服务端
         public readonly ServerApplication Server;
@@ -54,7 +57,8 @@ namespace SiegeOnlineServer.Collection
         public PlayerCollection(ServerApplication server)
         {
             GamingClients = new List<ServerPeer>();
-            UniqueIdToCharacter = new Dictionary<int, Character>();
+            UniqueIdToCharacterOriginal = new Dictionary<int, Character>();
+            UniqueIdToCharacterCopy = new Dictionary<int, Character>();
             Server = server;
         }
 
@@ -74,7 +78,13 @@ namespace SiegeOnlineServer.Collection
             // 回传字串
             public StringBuilder DebugMessage { get; set; }
 
-            // 回传码枚举值
+            /// <summary>
+            /// 类型：枚举
+            /// 名称：ReturnCodeTypes
+            /// 作者：taixihuase
+            /// 作用：角色查询操作回传码枚举
+            /// 编写日期：2015/8/1
+            /// </summary>
             [Serializable]
             public enum ReturnCodeTypes : byte
             {
@@ -128,7 +138,8 @@ namespace SiegeOnlineServer.Collection
                     int id = Server.Users.GetUniqueIdFromGuid(guid);
                     if (id >= 0)
                     {
-                        UniqueIdToCharacter.Remove(id);
+                        UniqueIdToCharacterOriginal.Remove(id);
+                        UniqueIdToCharacterCopy.Remove(id);
                     }
                 }
             }
@@ -157,13 +168,18 @@ namespace SiegeOnlineServer.Collection
         /// 编写日期：2015/7/22
         /// </summary>
         /// <param name="character"></param>
-        public void CharacterEnter(ref Character character)
+        /// <returns></returns>
+        public Character CharacterEnter(Character character)
         {
             lock (this)
             {
-                UniqueIdToCharacter.Add(character.UniqueId, character);
-                AddGamingCharacter(Server.Users.TryGetPeer(character.Guid));
                 character.WorldEnterTime = DateTime.Now;
+                UniqueIdToCharacterOriginal.Add(character.UniqueId, character);
+                Character characterCopy = new Character(character);
+                characterCopy.ApplyEquipments();
+                UniqueIdToCharacterCopy.Add(characterCopy.UniqueId, characterCopy);
+                AddGamingCharacter(Server.Users.TryGetPeer(character.Guid));
+                return characterCopy;
             }
         }
 
@@ -185,36 +201,71 @@ namespace SiegeOnlineServer.Collection
 
         /// <summary>
         /// 类型：方法
-        /// 名称：GetCharacter
+        /// 名称：GetCharacterOriginal
         /// 作者：taixihuase
-        /// 作用：通过编号获取角色信息
+        /// 作用：通过编号获取角色初始信息
         /// 编写日期：2015/7/22
         /// </summary>
         /// <param name="uniqueId"></param>
         /// <returns></returns>
-        public Character GetCharacter(int uniqueId)
+        public Character GetCharacterOriginal(int uniqueId)
         {
             Character character;
-            UniqueIdToCharacter.TryGetValue(uniqueId, out character);
+            UniqueIdToCharacterOriginal.TryGetValue(uniqueId, out character);
             return character;
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：GetCharacterCopy
+        /// 作者：taixihuase
+        /// 作用：通过编号获取角色加成信息
+        /// 编写日期：2015/8/20
+        /// </summary>
+        /// <param name="uniqueId"></param>
+        /// <returns></returns>
+        public Character GetCharacterCopy(int uniqueId)
+        {
+            Character character;
+            UniqueIdToCharacterCopy.TryGetValue(uniqueId, out character);
+            return character;
+        }
 
         /// <summary>
         /// 类型：方法
-        /// 名称：GetCharacterFromNickName
+        /// 名称：GetCharacterOriginalFromNickName
         /// 作者：taixihuase
-        /// 作用：通过昵称获取用户信息
+        /// 作用：通过昵称获取用户初始信息
         /// 编写日期：2015/7/22
         /// </summary>
         /// <param name="nickName"></param>
         /// <returns></returns>
-        public Character GetCharacterFromNickname(string nickName)
+        public Character GetCharacterOriginalFromNickname(string nickName)
         {
             int id = Server.Users.GetUniqueIdFromNickname(nickName);
-            if (id >= 0 && UniqueIdToCharacter.ContainsKey(id))
+            if (id >= 0 && UniqueIdToCharacterOriginal.ContainsKey(id))
             {
-                return GetCharacter(id);
+                return GetCharacterOriginal(id);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：GetCharacterCopyFromNickName
+        /// 作者：taixihuase
+        /// 作用：通过昵称获取用户加成信息
+        /// 编写日期：2015/8/20
+        /// </summary>
+        /// <param name="nickName"></param>
+        /// <returns></returns>
+        public Character GetCharacterCopyFromNickname(string nickName)
+        {
+            int id = Server.Users.GetUniqueIdFromNickname(nickName);
+            if (id >= 0 && UniqueIdToCharacterCopy.ContainsKey(id))
+            {
+                return GetCharacterCopy(id);
             }
 
             return null;

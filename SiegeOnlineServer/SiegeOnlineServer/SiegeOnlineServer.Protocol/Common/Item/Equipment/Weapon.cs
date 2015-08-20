@@ -188,98 +188,103 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         #region IEquipment接口实现
 
-        public void UpdateForgingAttribute(int level, AttributeCode attribute, float value)
+        public void Upgrade(AttributeCode attribute = AttributeCode.Null, float value = 0)
         {
-            if (ForgingAttributes.ContainsKey(level))
-            {
-                ForgingAttributes[level] = new KeyValuePair<AttributeCode, float>(attribute, value);
-            }
+            UpgradeForgingAttribute(attribute, value);
+            UpgradeCurrentLevel();
         }
 
-        public void UpgradeForgingAttribute(AttributeCode attribute, float value)
+        public void Degrade()
         {
-            if (CurrentLevel < 10)
-            {
-                ForgingAttributes[CurrentLevel + 1] = new KeyValuePair<AttributeCode, float>(attribute, value);
-            }
-        }
-
-        public void DegradeForgingAttribute()
-        {
-            if (CurrentLevel > 0)
-            {
-                ForgingAttributes.Remove(CurrentLevel);
-            }
-        }
-
-        public void UpgradeCurrentLevel()
-        {
-            if (CurrentLevel < DataConstraint.EquipmentMaxLevel)
-            {
-                CurrentLevel++;
-            }
-        }
-
-        public void DegradeCurrentLevel()
-        {
-            if (CurrentLevel > 0)
-            {
-                CurrentLevel--;
-            }
+            DegradeForgingAttribute();
+            DegradeCurrentLevel();
         }
 
         #endregion
 
         #region 重载抽象基类方法
 
-        public override void Apply(Character.Character character)
+        protected override void UpdateForgingAttribute(int level, AttributeCode attribute, float value)
         {
-            base.Apply(character);
-            character.Attribute.AttackSpeed = FixedAttackSpeed;
-            character.Attribute.AttackDistance = FixedAttackDistance;
-            if (AttackLimit.ContainsKey(WeaponAttributeType.Physical))
+            if (ForgingAttributes.ContainsKey(level) && !attribute.Equals(AttributeCode.Null) && Math.Abs(value) > 0)
             {
-                character.Attribute.AttackPhysical[1] += AttackLimit[WeaponAttributeType.Physical].Key;
-                character.Attribute.AttackPhysical[2] += AttackLimit[WeaponAttributeType.Physical].Value;
+                ForgingAttributes[level] = new KeyValuePair<AttributeCode, float>(attribute, value);
             }
-            if (AttackLimit.ContainsKey(WeaponAttributeType.Magic))
-            {
-                character.Attribute.AttackMagic[1] += AttackLimit[WeaponAttributeType.Magic].Key;
-                character.Attribute.AttackMagic[2] += AttackLimit[WeaponAttributeType.Magic].Value;
-            }
-            foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
-            {
-                if (attribute.Key > 0)
-                {
-                    UpdateCharacterAttribute(character, attribute.Value, true);
-                }
-            }
-            CalculateCharacterAttributes(character);
         }
 
-        public override void Cancel(Character.Character character)
+        protected override void UpgradeForgingAttribute(AttributeCode attribute, float value)
         {
-            base.Cancel(character);
-            character.Attribute.AttackSpeed = DataConstraint.CharacterDefaultAttackSpeed;
-            character.Attribute.AttackDistance = DataConstraint.CharacterDefaultAttackDistance;
-            if (AttackLimit.ContainsKey(WeaponAttributeType.Physical))
+            if (CurrentLevel < DataConstraint.EquipmentMaxLevel && !attribute.Equals(AttributeCode.Null) &&
+                Math.Abs(value) > 0)
             {
-                character.Attribute.AttackPhysical[1] -= AttackLimit[WeaponAttributeType.Physical].Key;
-                character.Attribute.AttackPhysical[2] -= AttackLimit[WeaponAttributeType.Physical].Value;
+                ForgingAttributes[CurrentLevel + 1] = new KeyValuePair<AttributeCode, float>(attribute, value);
             }
-            if (AttackLimit.ContainsKey(WeaponAttributeType.Magic))
+        }
+
+        protected override void DegradeForgingAttribute()
+        {
+            if (CurrentLevel > 0 && ForgingAttributes.ContainsKey(CurrentLevel))
             {
-                character.Attribute.AttackMagic[1] -= AttackLimit[WeaponAttributeType.Magic].Key;
-                character.Attribute.AttackMagic[2] -= AttackLimit[WeaponAttributeType.Magic].Value;
+                ForgingAttributes.Remove(CurrentLevel);
             }
-            foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
+        }
+
+        public override bool Apply(Character.Character character)
+        {
+            if (base.Apply(character))
             {
-                if (attribute.Key > 0)
+                character.Attribute.AttackSpeed = FixedAttackSpeed;
+                character.Attribute.AttackDistance = FixedAttackDistance;
+                if (AttackLimit.ContainsKey(WeaponAttributeType.Physical))
                 {
-                    UpdateCharacterAttribute(character, attribute.Value, false);
+                    character.Attribute.AttackPhysical[1] += AttackLimit[WeaponAttributeType.Physical].Key;
+                    character.Attribute.AttackPhysical[2] += AttackLimit[WeaponAttributeType.Physical].Value;
                 }
+                if (AttackLimit.ContainsKey(WeaponAttributeType.Magic))
+                {
+                    character.Attribute.AttackMagic[1] += AttackLimit[WeaponAttributeType.Magic].Key;
+                    character.Attribute.AttackMagic[2] += AttackLimit[WeaponAttributeType.Magic].Value;
+                }
+                foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
+                {
+                    if (attribute.Key > 0)
+                    {
+                        UpdateCharacterAttribute(character, attribute.Value, true);
+                    }
+                }
+                CalculateCharacterAttributes(character);
+                return true;
             }
-            CalculateCharacterAttributes(character);
+            return false;
+        }
+
+        public override bool Cancel(Character.Character character)
+        {
+            if (base.Cancel(character))
+            {
+                character.Attribute.AttackSpeed = DataConstraint.CharacterDefaultAttackSpeed;
+                character.Attribute.AttackDistance = DataConstraint.CharacterDefaultAttackDistance;
+                if (AttackLimit.ContainsKey(WeaponAttributeType.Physical))
+                {
+                    character.Attribute.AttackPhysical[1] -= AttackLimit[WeaponAttributeType.Physical].Key;
+                    character.Attribute.AttackPhysical[2] -= AttackLimit[WeaponAttributeType.Physical].Value;
+                }
+                if (AttackLimit.ContainsKey(WeaponAttributeType.Magic))
+                {
+                    character.Attribute.AttackMagic[1] -= AttackLimit[WeaponAttributeType.Magic].Key;
+                    character.Attribute.AttackMagic[2] -= AttackLimit[WeaponAttributeType.Magic].Value;
+                }
+                foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
+                {
+                    if (attribute.Key > 0)
+                    {
+                        UpdateCharacterAttribute(character, attribute.Value, false);
+                    }
+                }
+                CalculateCharacterAttributes(character);
+                return true;
+            }
+            return false;
         }
 
         #endregion

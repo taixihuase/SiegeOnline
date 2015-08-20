@@ -127,78 +127,83 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         #region IEquipment接口实现
 
-        public void UpdateForgingAttribute(int level, AttributeCode attribute, float value)
+        public void Upgrade(AttributeCode attribute = AttributeCode.Null, float value = 0)
         {
-            if (ForgingAttributes.ContainsKey(level))
-            {
-                ForgingAttributes[level] = new KeyValuePair<AttributeCode, float>(attribute, value);
-            }
+            UpgradeForgingAttribute(attribute, value);
+            UpgradeCurrentLevel();
         }
 
-        public void UpgradeForgingAttribute(AttributeCode attribute, float value)
+        public void Degrade()
         {
-            if (CurrentLevel < 10)
-            {
-                ForgingAttributes[CurrentLevel + 1] = new KeyValuePair<AttributeCode, float>(attribute, value);
-            }
-        }
-
-        public void DegradeForgingAttribute()
-        {
-            if (CurrentLevel > 0)
-            {
-                ForgingAttributes.Remove(CurrentLevel);
-            }
-        }
-
-        public void UpgradeCurrentLevel()
-        {
-            if (CurrentLevel < DataConstraint.EquipmentMaxLevel)
-            {
-                CurrentLevel++;
-            }
-        }
-
-        public void DegradeCurrentLevel()
-        {
-            if (CurrentLevel > 0)
-            {
-                CurrentLevel--;
-            }
+            DegradeForgingAttribute();
+            DegradeCurrentLevel();
         }
 
         #endregion
 
         #region 重载抽象基类方法
 
-        public override void Apply(Character.Character character)
+        protected override void UpdateForgingAttribute(int level, AttributeCode attribute, float value)
         {
-            base.Apply(character);
-            character.Attribute.DefensePhysical[1] += DefensePoints[0];
-            character.Attribute.DefenseMagic[1] += DefensePoints[1];
-            foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
+            if (ForgingAttributes.ContainsKey(level) && !attribute.Equals(AttributeCode.Null) && Math.Abs(value) > 0)
             {
-                if (attribute.Key > 0)
-                {
-                    UpdateCharacterAttribute(character, attribute.Value, true);
-                }
+                ForgingAttributes[level] = new KeyValuePair<AttributeCode, float>(attribute, value);
             }
-            CalculateCharacterAttributes(character);
         }
 
-        public override void Cancel(Character.Character character)
+        protected override void UpgradeForgingAttribute(AttributeCode attribute, float value)
         {
-            base.Cancel(character);
-            character.Attribute.DefensePhysical[1] -= DefensePoints[0];
-            character.Attribute.DefenseMagic[1] -= DefensePoints[1];
-            foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
+            if (CurrentLevel < DataConstraint.EquipmentMaxLevel && !attribute.Equals(AttributeCode.Null) &&
+                Math.Abs(value) > 0)
             {
-                if (attribute.Key > 0)
-                {
-                    UpdateCharacterAttribute(character, attribute.Value, false);
-                }
+                ForgingAttributes[CurrentLevel + 1] = new KeyValuePair<AttributeCode, float>(attribute, value);
             }
-            CalculateCharacterAttributes(character);
+        }
+
+        protected override void DegradeForgingAttribute()
+        {
+            if (CurrentLevel > 0 && ForgingAttributes.ContainsKey(CurrentLevel))
+            {
+                ForgingAttributes.Remove(CurrentLevel);
+            }
+        }
+
+        public override bool Apply(Character.Character character)
+        {
+            if (base.Apply(character))
+            {
+                character.Attribute.DefensePhysical[1] += DefensePoints[0];
+                character.Attribute.DefenseMagic[1] += DefensePoints[1];
+                foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
+                {
+                    if (attribute.Key > 0)
+                    {
+                        UpdateCharacterAttribute(character, attribute.Value, true);
+                    }
+                }
+                CalculateCharacterAttributes(character);
+                return true;
+            }
+            return false;
+        }
+
+        public override bool Cancel(Character.Character character)
+        {
+            if (base.Cancel(character))
+            {
+                character.Attribute.DefensePhysical[1] -= DefensePoints[0];
+                character.Attribute.DefenseMagic[1] -= DefensePoints[1];
+                foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
+                {
+                    if (attribute.Key > 0)
+                    {
+                        UpdateCharacterAttribute(character, attribute.Value, false);
+                    }
+                }
+                CalculateCharacterAttributes(character);
+                return true;
+            }
+            return false;
         }
 
         #endregion
