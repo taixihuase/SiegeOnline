@@ -87,8 +87,11 @@ namespace SiegeOnline.ClientLogic.Scene.CharacterScene
                 e.Character.Nickname, e.Character.Status);
             PhotonService.Player.Character = e.Character;
 
-            Debug.Log(e.Character.Occupation.Name);
-            Debug.Log(e.Character.Skills[-1].SkillId);
+            e.Character.Weapons[1].Apply(e.Character);
+            e.Character.Armors[1].Apply(e.Character);
+            e.Character.Jewels[1].Apply(e.Character);
+
+
         }
 
         #endregion

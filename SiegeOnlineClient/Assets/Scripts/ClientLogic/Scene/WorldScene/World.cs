@@ -126,7 +126,7 @@ namespace SiegeOnline.ClientLogic.Scene.WorldScene
         /// <param name="e"></param>
         private void MyWorldPlayerEnter(object sender, WorldEnterEventArgs e)
         {
-            Debug.Log(e.MyCharacter.Attribute.WorldEnterTime);
+            Debug.Log(e.MyCharacter.WorldEnterTime);
         }
 
         /// <summary>

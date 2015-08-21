@@ -65,16 +65,16 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         /// 编写日期：2015/8/16
         /// </summary>
         [Serializable]
-        public enum WeaponAttributeType : byte
+        public enum WeaponAttributeType
         {
             Both,
             Magic,
             Physical
         }
 
-        public WeaponAttributeType WeaponAttribute { get; protected set; } // 武器攻击属性类型
+        public byte WeaponAttribute { get; protected set; } // 武器攻击属性类型
 
-        public Dictionary<WeaponAttributeType, KeyValuePair<int, int>> AttackLimit; // 攻击力上下限
+        public Dictionary<int, KeyValuePair<int, int>> AttackLimit; // 攻击力上下限
 
         #endregion
 
@@ -109,21 +109,21 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             : base(fixedId, allocatedId, name, occupation, limit, cur, dur, EquipmentType.Weapon)
         {
             Type = (byte) type;
-            WeaponAttribute = weaponAttributeType;
+            WeaponAttribute = (byte) weaponAttributeType;
 
             if (weaponAttributeType == WeaponAttributeType.Both)
             {
-                AttackLimit = new Dictionary<WeaponAttributeType, KeyValuePair<int, int>>
+                AttackLimit = new Dictionary<int, KeyValuePair<int, int>>
                 {
-                    [WeaponAttributeType.Magic] = new KeyValuePair<int, int>(0, 0),
-                    [WeaponAttributeType.Physical] = new KeyValuePair<int, int>(0, 0)
+                    [(int) WeaponAttributeType.Magic] = new KeyValuePair<int, int>(0, 0),
+                    [(int) WeaponAttributeType.Physical] = new KeyValuePair<int, int>(0, 0)
                 };
             }
             else
             {
-                AttackLimit = new Dictionary<WeaponAttributeType, KeyValuePair<int, int>>
+                AttackLimit = new Dictionary<int, KeyValuePair<int, int>>
                 {
-                    [weaponAttributeType] = new KeyValuePair<int, int>(0, 0)
+                    [(int) weaponAttributeType] = new KeyValuePair<int, int>(0, 0)
                 };
             }
 
@@ -143,12 +143,13 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         public Weapon()
         {
             Type = (byte) WeaponType.Null;
-            WeaponAttribute = WeaponAttributeType.Both;
-            AttackLimit = new Dictionary<WeaponAttributeType, KeyValuePair<int, int>>
+            WeaponAttribute = (int)WeaponAttributeType.Both;
+            AttackLimit = new Dictionary<int, KeyValuePair<int, int>>
             {
-                [WeaponAttributeType.Magic] = new KeyValuePair<int, int>(0, 0),
-                [WeaponAttributeType.Physical] = new KeyValuePair<int, int>(0, 0)
+                {(int) WeaponAttributeType.Physical, new KeyValuePair<int, int>(0, 0)},
+                {(int) WeaponAttributeType.Magic, new KeyValuePair<int, int>(1, 1)}
             };
+
             ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, float>>
             {
                 {-1, new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0)}
@@ -170,17 +171,17 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         {
             if (physicalMin.HasValue && physicalMax.HasValue)
             {
-                if (AttackLimit.ContainsKey(WeaponAttributeType.Physical))
+                if (AttackLimit.ContainsKey((int) WeaponAttributeType.Physical))
                 {
-                    AttackLimit[WeaponAttributeType.Physical] = new KeyValuePair<int, int>(physicalMin.Value,
+                    AttackLimit[(int) WeaponAttributeType.Physical] = new KeyValuePair<int, int>(physicalMin.Value,
                         physicalMax.Value);
                 }
             }
             if (magicMin.HasValue && magicMax.HasValue)
             {
-                if (AttackLimit.ContainsKey(WeaponAttributeType.Magic))
+                if (AttackLimit.ContainsKey((int) WeaponAttributeType.Magic))
                 {
-                    AttackLimit[WeaponAttributeType.Magic] = new KeyValuePair<int, int>(magicMin.Value,
+                    AttackLimit[(int) WeaponAttributeType.Magic] = new KeyValuePair<int, int>(magicMin.Value,
                         magicMax.Value);
                 }
             }
@@ -235,15 +236,15 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             {
                 character.Attribute.AttackSpeed = FixedAttackSpeed;
                 character.Attribute.AttackDistance = FixedAttackDistance;
-                if (AttackLimit.ContainsKey(WeaponAttributeType.Physical))
+                if (AttackLimit.ContainsKey((int) WeaponAttributeType.Physical))
                 {
-                    character.Attribute.AttackPhysical[1] += AttackLimit[WeaponAttributeType.Physical].Key;
-                    character.Attribute.AttackPhysical[2] += AttackLimit[WeaponAttributeType.Physical].Value;
+                    character.Attribute.AttackPhysical[1] += AttackLimit[(int) WeaponAttributeType.Physical].Key;
+                    character.Attribute.AttackPhysical[2] += AttackLimit[(int) WeaponAttributeType.Physical].Value;
                 }
-                if (AttackLimit.ContainsKey(WeaponAttributeType.Magic))
+                if (AttackLimit.ContainsKey((int) WeaponAttributeType.Magic))
                 {
-                    character.Attribute.AttackMagic[1] += AttackLimit[WeaponAttributeType.Magic].Key;
-                    character.Attribute.AttackMagic[2] += AttackLimit[WeaponAttributeType.Magic].Value;
+                    character.Attribute.AttackMagic[1] += AttackLimit[(int) WeaponAttributeType.Magic].Key;
+                    character.Attribute.AttackMagic[2] += AttackLimit[(int) WeaponAttributeType.Magic].Value;
                 }
                 foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
                 {
@@ -264,15 +265,15 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             {
                 character.Attribute.AttackSpeed = DataConstraint.CharacterDefaultAttackSpeed;
                 character.Attribute.AttackDistance = DataConstraint.CharacterDefaultAttackDistance;
-                if (AttackLimit.ContainsKey(WeaponAttributeType.Physical))
+                if (AttackLimit.ContainsKey((int) WeaponAttributeType.Physical))
                 {
-                    character.Attribute.AttackPhysical[1] -= AttackLimit[WeaponAttributeType.Physical].Key;
-                    character.Attribute.AttackPhysical[2] -= AttackLimit[WeaponAttributeType.Physical].Value;
+                    character.Attribute.AttackPhysical[1] -= AttackLimit[(int) WeaponAttributeType.Physical].Key;
+                    character.Attribute.AttackPhysical[2] -= AttackLimit[(int) WeaponAttributeType.Physical].Value;
                 }
-                if (AttackLimit.ContainsKey(WeaponAttributeType.Magic))
+                if (AttackLimit.ContainsKey((int) WeaponAttributeType.Magic))
                 {
-                    character.Attribute.AttackMagic[1] -= AttackLimit[WeaponAttributeType.Magic].Key;
-                    character.Attribute.AttackMagic[2] -= AttackLimit[WeaponAttributeType.Magic].Value;
+                    character.Attribute.AttackMagic[1] -= AttackLimit[(int) WeaponAttributeType.Magic].Key;
+                    character.Attribute.AttackMagic[2] -= AttackLimit[(int) WeaponAttributeType.Magic].Value;
                 }
                 foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
                 {

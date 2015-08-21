@@ -105,11 +105,8 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             Durability = durability;
             Using = false;
             EquipType = (byte) type;
-            FixedAttributes = new List<KeyValuePair<AttributeCode, float>>
-            {
-                new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0)
-            };
-            RandomAttribute = new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0);
+            FixedAttributes = new List<KeyValuePair<AttributeCode, float>>();
+            RandomAttribute = new KeyValuePair<AttributeCode, float>();
         }
 
         /// <summary>
@@ -130,11 +127,8 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             Durability = DataConstraint.EquipmentMaxDurability;
             Using = false;
             EquipType = (byte) EquipmentType.Null;
-            FixedAttributes = new List<KeyValuePair<AttributeCode, float>>
-            {
-                new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0)
-            };
-            RandomAttribute = new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0);
+            FixedAttributes = new List<KeyValuePair<AttributeCode, float>>();
+            RandomAttribute = new KeyValuePair<AttributeCode, float>();
         }
 
         #region IItem接口实现
@@ -253,6 +247,9 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             float v = attribute.Value;
             switch (attribute.Key)
             {
+                case AttributeCode.Null:
+                    break;
+
                     #region 采用数组进行存储的属性值改变
 
                 case AttributeCode.Attack_Both:
@@ -414,7 +411,8 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                 default:
                 {
                     string code = attribute.Key.ToString().Replace("_", "");
-                    Type type = character.Attribute.GetType();
+                    Type type = typeof (Character.CharacterAttribute);
+
                     if (code.Contains("Both"))
                     {
                         string physical = code.Replace("Both", "Physical");
@@ -440,7 +438,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                     else if (code.Contains("All"))
                     {
                         string attr = code.Replace("All", "");
-                        var pi = type.GetProperties().Where(x => x.Name.Contains(attr));
+                        var pi = type.GetProperties().Where(x => x.Name.StartsWith(attr));
                         foreach (var propertyInfo in pi)
                         {
                             int newv = (int) propertyInfo.GetValue(character.Attribute, null);
@@ -455,7 +453,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                     else
                     {
                         var pi = type.GetProperty(code);
-                        Type t = pi.PropertyType;
+                        var t = pi.PropertyType;
                         if (t == typeof (int))
                         {
                             int newv = (int) pi.GetValue(character.Attribute, null);

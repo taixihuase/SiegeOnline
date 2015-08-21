@@ -92,7 +92,8 @@ namespace SiegeOnlineServer.Database
                 Jewel j = new Jewel(100, 200, "戒指", OccupationCode.Common, 1, 1, DataConstraint.EquipmentMaxDurability,
                     Jewel.JewelType.Ring, Jewel.JewelAttributeType.Null);
                 character.Jewels.Add(1, j);
-                j.AddFixedAttribute(AttributeCode.Enhance_All, 10000);
+                j.AddFixedAttribute(AttributeCode.Resistance_All, 22222);
+
 
                 #endregion
 

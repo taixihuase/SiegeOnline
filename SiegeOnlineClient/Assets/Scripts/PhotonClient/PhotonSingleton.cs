@@ -59,6 +59,8 @@ namespace SiegeOnlineClient.PhotonClient
 
         // 服务端 IP 地址
         private static string ServerIp = "203.195.224.120";
+        //private static string ServerIp = "127.0.0.1";
+
 
         // 服务端端口号
         private static int ServerPort = 4530;
