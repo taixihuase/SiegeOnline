@@ -19,7 +19,10 @@
 //
 //----------------------------------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using SiegeOnlineClient.ClientLogic.Event;
 using SiegeOnlineClient.PhotonClient;
 using SiegeOnlineServer.Protocol;
@@ -87,9 +90,15 @@ namespace SiegeOnline.ClientLogic.Scene.CharacterScene
                 e.Character.Nickname, e.Character.Status);
             PhotonService.Player.Character = e.Character;
 
+            Debug.Log(e.Character.Attribute.AttackSpeed);
+
             e.Character.Weapons[1].Apply(e.Character);
+            Debug.Log(e.Character.Attribute.AttackSpeed);
+
             e.Character.Armors[1].Apply(e.Character);
+            Debug.Log(e.Character.Attribute.AttackSpeed);
             e.Character.Jewels[1].Apply(e.Character);
+            Debug.Log(e.Character.Attribute.AttackSpeed);
 
 
         }

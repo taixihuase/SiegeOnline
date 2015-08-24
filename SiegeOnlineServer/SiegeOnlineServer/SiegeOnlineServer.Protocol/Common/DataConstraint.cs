@@ -48,5 +48,9 @@ namespace SiegeOnlineServer.Protocol.Common
         public static float CharacterDefaultSkillCooldownSpeed => 100;
 
         public static float CharacterDefaultExperienceGainSpeed => 100;
+
+        public static int ElementMaxSize => 7;
+
+        public static int WeaponMaxElementEnergy => 1000;
     }
 }

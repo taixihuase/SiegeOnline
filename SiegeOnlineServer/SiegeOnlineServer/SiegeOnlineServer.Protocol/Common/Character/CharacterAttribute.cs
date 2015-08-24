@@ -47,9 +47,17 @@ namespace SiegeOnlineServer.Protocol.Common.Character
 
         #region 攻击属性
 
-        public int[] AttackMagic { get; set; }
+        public int AttackMagic { get; set; }
 
-        public int[] AttackPhysical { get; set; }
+        public int AttackMagicMin { get; set; }
+
+        public int AttackMagicMax { get; set; }
+
+        public int AttackPhysical { get; set; }
+
+        public int AttackPhysicalMin { get; set; }
+
+        public int AttackPhysicalMax { get; set; }
 
         public float AttackPercentMagic { get; set; }
 
@@ -89,9 +97,13 @@ namespace SiegeOnlineServer.Protocol.Common.Character
 
         #region 防御属性
 
-        public int[] DefenseMagic { get; set; }
+        public int DefenseMagic { get; set; }
 
-        public int[] DefensePhysical { get; set; }
+        public int DefenseMagicBase { get; set; }
+
+        public int DefensePhysical { get; set; }
+
+        public int DefensePhysicalBase { get; set; }
 
         public float DefensePercentMagic { get; set; }
 
@@ -143,7 +155,9 @@ namespace SiegeOnlineServer.Protocol.Common.Character
 
         #region 红蓝属性
 
-        public int[] HitPoint { get; set; }
+        public int HitPoint { get; set; }
+
+        public int HitPointBase { get; set; }
 
         public float LifeIncreasePercent { get; set; }
 
@@ -151,7 +165,9 @@ namespace SiegeOnlineServer.Protocol.Common.Character
 
         public float LifeSteal { get; set; }
 
-        public int[] Mana { get; set; }
+        public int Mana { get; set; }
+
+        public int ManaBase { get; set; }
 
         public float ManaIncreasePercent { get; set; }
 
@@ -166,6 +182,8 @@ namespace SiegeOnlineServer.Protocol.Common.Character
         public float Feedback { get; set; }
 
         public float Immunity { get; set; }
+
+        public float Penetration { get; set; }
 
         public float Rebound { get; set; }
 
@@ -185,6 +203,10 @@ namespace SiegeOnlineServer.Protocol.Common.Character
 
         #endregion
 
+        public float WeaponExtraAttackSpeed { get; set; }  // 武器攻击速度
+
+        public float WeaponExtraAttackDistance { get; set; }  // 武器攻击射程
+
         /// <summary>
         /// 类型：方法
         /// 名称：CharacterrAttribute
@@ -194,18 +216,33 @@ namespace SiegeOnlineServer.Protocol.Common.Character
         /// </summary>
         public CharacterAttribute()
         {
-            AttackMagic = new int[3];
-            AttackPhysical = new int[3];
-            DefenseMagic = new int[2];
-            DefensePhysical = new int[2];
-            HitPoint = new int[2];
-            Mana = new int[2];
-
             AttackSpeed = DataConstraint.CharacterDefaultAttackSpeed;
             AttackDistance = DataConstraint.CharacterDefaultAttackDistance;
             MovementSpeed = DataConstraint.CharacterDefaultMovementSpeed;
             SkillCooldownSpeed = DataConstraint.CharacterDefaultSkillCooldownSpeed;
             ExperienceGainSpeed = DataConstraint.CharacterDefaultExperienceGainSpeed;
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：CalculateAttributes
+        /// 作者：taixihuase
+        /// 作用：重新计算角色的最终属性
+        /// 编写日期：2015/8/19
+        /// </summary>
+        public void CalculateAttributes()
+        {
+            AttackPhysical = (int) ((AttackPhysicalMin + AttackPhysicalMax)*(100 + AttackPercentPhysical)*0.005);
+            AttackMagic = (int) ((AttackMagicMin + AttackMagicMax)*(100 + AttackPercentMagic)*0.005);
+            DefensePhysical = (int) (DefensePhysicalBase*(100 + DefensePercentPhysical)*0.01);
+            DefenseMagic = (int) (DefenseMagicBase*(100 + DefensePercentMagic)*0.01);
+            HitPoint = (int) (HitPointBase*(100 + LifeIncreasePercent)*0.01);
+            Mana = (int) (ManaBase*(100 + ManaIncreasePercent)*0.01);
+            AttackSpeed = SpeedAttack + WeaponExtraAttackSpeed + DataConstraint.CharacterDefaultAttackSpeed;
+            AttackDistance = WeaponExtraAttackDistance + DataConstraint.CharacterDefaultAttackDistance;
+            SkillCooldownSpeed = DataConstraint.CharacterDefaultSkillCooldownSpeed - SpeedCooldown;
+            MovementSpeed = DataConstraint.CharacterDefaultMovementSpeed + SpeedMovement;
+            ExperienceGainSpeed = DataConstraint.CharacterDefaultExperienceGainSpeed + SpeedExperience;
         }
     }
 }

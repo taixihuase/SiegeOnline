@@ -21,7 +21,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using SiegeOnlineServer.Protocol.Common.Character;
 
 // ReSharper disable InconsistentNaming
 
@@ -51,7 +53,9 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         public int Durability { get; set; } // 耐久度
 
-        public bool Using { get; set; } // 是否正在穿戴
+        public bool IsCanUpgrade { get; protected set; } // 是否可升级
+
+        public bool IsUsing { get; set; } // 是否正在穿戴
 
         #region 装备类型
 
@@ -71,11 +75,11 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             Weapon
         }
 
-        public byte EquipType { get; protected set; } // 装备类型
+        public EquipmentType EquipType { get; protected set; } // 装备类型
 
         #endregion
 
-        public List<KeyValuePair<AttributeCode, float>> FixedAttributes; // 固定属性（多条）
+        public Dictionary<AttributeCode, float> FixedAttributes; // 固定属性（多条）
         public KeyValuePair<AttributeCode, float> RandomAttribute; // 随机属性（单条）
 
         /// <summary>
@@ -90,23 +94,28 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         /// <param name="name"></param>
         /// <param name="occupation"></param>
         /// <param name="limit"></param>
+        /// <param name="upgrade"></param>
         /// <param name="cur"></param>
         /// <param name="durability"></param>
         /// <param name="type"></param>
-        protected Equipment(int @fixed, int allocated, string name, OccupationCode occupation, int limit, int cur,
-            int durability, EquipmentType type)
+        protected Equipment(int @fixed, int allocated, string name, OccupationCode occupation, int limit, bool upgrade,
+            int cur, int durability, EquipmentType type)
         {
             FixedId = @fixed;
             AllocatedId = allocated;
             Name = name;
             Occupation = (byte) occupation;
             LevelLimit = limit;
+            IsCanUpgrade = upgrade;
             CurrentLevel = cur;
             Durability = durability;
-            Using = false;
-            EquipType = (byte) type;
-            FixedAttributes = new List<KeyValuePair<AttributeCode, float>>();
-            RandomAttribute = new KeyValuePair<AttributeCode, float>();
+            IsUsing = false;
+            EquipType = type;
+            FixedAttributes = new Dictionary<AttributeCode, float>(new EnumComparer<AttributeCode>())
+            {
+                {AttributeCode.Null, 0}
+            };
+            RandomAttribute = new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0);
         }
 
         /// <summary>
@@ -123,26 +132,31 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             Name = "";
             Occupation = (byte) OccupationCode.Common;
             LevelLimit = 0;
+            IsCanUpgrade = false;
             CurrentLevel = 0;
             Durability = DataConstraint.EquipmentMaxDurability;
-            Using = false;
-            EquipType = (byte) EquipmentType.Null;
-            FixedAttributes = new List<KeyValuePair<AttributeCode, float>>();
-            RandomAttribute = new KeyValuePair<AttributeCode, float>();
+            IsUsing = false;
+            EquipType = EquipmentType.Null;
+            FixedAttributes = new Dictionary<AttributeCode, float>(new EnumComparer<AttributeCode>())
+            {
+                {AttributeCode.Null, 0}
+            };
+            RandomAttribute = new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0);
         }
 
         #region IItem接口实现
 
         public virtual bool Apply(Character.Character character)
         {
-            if (!Using)
+            if (!IsUsing)
             {
-                foreach (KeyValuePair<AttributeCode, float> fixedAttribute in FixedAttributes)
+                foreach (KeyValuePair<AttributeCode, float> attribute in FixedAttributes)
                 {
-                    UpdateCharacterAttribute(character, fixedAttribute, true);
+                    UpdateCharacterAttribute(character, attribute, true);
                 }
-                CalculateCharacterAttributes(character);
-                Using = true;
+                UpdateCharacterAttribute(character, RandomAttribute, true);
+                character.Attribute.CalculateAttributes();
+                IsUsing = true;
                 return true;
             }
             return false;
@@ -150,14 +164,15 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         public virtual bool Cancel(Character.Character character)
         {
-            if (Using)
+            if (IsUsing)
             {
-                foreach (KeyValuePair<AttributeCode, float> fixedAttribute in FixedAttributes)
+                foreach (KeyValuePair<AttributeCode, float> attribute in FixedAttributes)
                 {
-                    UpdateCharacterAttribute(character, fixedAttribute, false);
+                    UpdateCharacterAttribute(character, attribute, false);
                 }
-                CalculateCharacterAttributes(character);
-                Using = false;
+                UpdateCharacterAttribute(character, RandomAttribute, false);
+                character.Attribute.CalculateAttributes();
+                IsUsing = false;
                 return true;
             }
             return false;
@@ -169,23 +184,6 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         /// <summary>
         /// 类型：方法
-        /// 名称：AddFixedAttribute
-        /// 作者：taixihuase
-        /// 作用：添加一条固定属性
-        /// 编写日期：2015/8/20
-        /// </summary>
-        /// <param name="attribute"></param>
-        /// <param name="value"></param>
-        public void AddFixedAttribute(AttributeCode attribute, float value)
-        {
-            if (!FixedAttributes.Exists(x => x.Key.Equals(attribute)))
-            {
-                FixedAttributes.Add(new KeyValuePair<AttributeCode, float>(attribute, value));
-            }
-        }
-
-        /// <summary>
-        /// 类型：方法
         /// 名称：RemoveFixedAttribute
         /// 作者：taixihuase
         /// 作用：移除一条固定属性
@@ -194,8 +192,74 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         /// <param name="attribute"></param>
         public void RemoveFixedAttribute(AttributeCode attribute)
         {
-            FixedAttributes.RemoveAll(x => x.Key.Equals(attribute));
+            FixedAttributes.Remove(attribute);
         }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：UpdateFixedAttribute
+        /// 作者：taixihuase
+        /// 作用：变更一条固定属性，含添加、更改及删除操作
+        /// 编写日期：2015/8/20
+        /// </summary>
+        /// <param name="attribute"></param>
+        /// <param name="value"></param>
+        public void UpdateFixedAttribute(AttributeCode attribute, float value)
+        {
+            if (Math.Abs(value) > 0)
+            {
+                if (FixedAttributes.ContainsKey(attribute))
+                {
+                    FixedAttributes[attribute] = value;
+                }
+                else
+                {
+                    FixedAttributes.Add(attribute, value);
+                }
+            }
+            else
+            {
+                RemoveFixedAttribute(attribute);
+            }
+        }
+
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：RemoveRandomAttribute
+        /// 作者：taixihuase
+        /// 作用：移除随机属性
+        /// 编写日期：2015/8/20
+        /// </summary>
+        public void RemoveRandomAttribute()
+        {
+            RandomAttribute = new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0);
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：UpdateRandomAttribute
+        /// 作者：taixihuase
+        /// 作用：变更随机属性，含添加、更改及删除操作
+        /// 编写日期：2015/8/20
+        /// </summary>
+        /// <param name="attribute"></param>
+        /// <param name="value"></param>
+        public void UpdateRandomAttribute(AttributeCode attribute, float value)
+        {
+            if (attribute != AttributeCode.Null)
+            {
+                if (value > 0)
+                {
+                    RandomAttribute = new KeyValuePair<AttributeCode, float>(attribute, value);
+                }
+            }
+            else
+            {
+                RemoveRandomAttribute();
+            }
+        }
+
 
         /// <summary>
         /// 类型：方法
@@ -239,75 +303,77 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         /// <param name="character"></param>
         /// <param name="attribute"></param>
         /// <param name="activated"></param>
-        protected void UpdateCharacterAttribute(Character.Character character,
-            KeyValuePair<AttributeCode, float> attribute,
-            bool activated)
+        protected void UpdateCharacterAttribute(Character.Character character, KeyValuePair<AttributeCode, float> attribute, bool activated)
         {
             int sign = activated ? 1 : -1;
-            float v = attribute.Value;
+
+            float f = attribute.Value;
+            int i = Convert.ToInt32(f);
+
             switch (attribute.Key)
             {
                 case AttributeCode.Null:
+
                     break;
 
-                    #region 采用数组进行存储的属性值改变
+                    #region 特殊命名格式的属性值改变
 
                 case AttributeCode.Attack_Both:
-                    character.Attribute.AttackPhysical[1] += (int) v*sign;
-                    character.Attribute.AttackPhysical[2] += (int) v*sign;
-                    if (character.Attribute.AttackPhysical[1] <= 0)
+                    character.Attribute.AttackPhysicalMin += i*sign;
+                    character.Attribute.AttackPhysicalMax += i*sign;
+                    if (character.Attribute.AttackPhysicalMin <= 0)
                     {
-                        character.Attribute.AttackPhysical[1] = 0;
+                        character.Attribute.AttackPhysicalMin = 0;
                     }
-                    if (character.Attribute.AttackPhysical[2] <= 0)
+                    if (character.Attribute.AttackPhysicalMax <= 0)
                     {
-                        character.Attribute.AttackPhysical[2] = 0;
+                        character.Attribute.AttackPhysicalMax = 0;
                     }
-                    character.Attribute.AttackMagic[1] += (int) v*sign;
-                    character.Attribute.AttackMagic[2] += (int) v*sign;
-                    if (character.Attribute.AttackMagic[1] <= 0)
+                    character.Attribute.AttackMagicMin += i*sign;
+                    character.Attribute.AttackMagicMax += i*sign;
+                    if (character.Attribute.AttackMagicMin <= 0)
                     {
-                        character.Attribute.AttackMagic[1] = 0;
+                        character.Attribute.AttackMagicMin = 0;
                     }
-                    if (character.Attribute.AttackMagic[2] <= 0)
+                    if (character.Attribute.AttackMagicMax <= 0)
                     {
-                        character.Attribute.AttackMagic[2] = 0;
+                        character.Attribute.AttackMagicMax = 0;
                     }
                     break;
 
                 case AttributeCode.Attack_Magic:
-                    character.Attribute.AttackMagic[1] += (int) v*sign;
-                    character.Attribute.AttackMagic[2] += (int) v*sign;
-                    if (character.Attribute.AttackMagic[1] <= 0)
+                    character.Attribute.AttackMagicMin += i*sign;
+                    character.Attribute.AttackMagicMax += i*sign;
+                    if (character.Attribute.AttackMagicMin <= 0)
                     {
-                        character.Attribute.AttackMagic[1] = 0;
+                        character.Attribute.AttackMagicMin = 0;
                     }
-                    if (character.Attribute.AttackMagic[2] <= 0)
+                    if (character.Attribute.AttackMagicMax <= 0)
                     {
-                        character.Attribute.AttackMagic[2] = 0;
+                        character.Attribute.AttackMagicMax = 0;
                     }
                     break;
 
                 case AttributeCode.Attack_Physical:
-                    character.Attribute.AttackPhysical[1] += (int) v*sign;
-                    character.Attribute.AttackPhysical[2] += (int) v*sign;
-                    if (character.Attribute.AttackPhysical[1] <= 0)
+                    character.Attribute.AttackPhysicalMin += i*sign;
+                    character.Attribute.AttackPhysicalMax += i*sign;
+                    if (character.Attribute.AttackPhysicalMin <= 0)
                     {
-                        character.Attribute.AttackPhysical[1] = 0;
+                        character.Attribute.AttackPhysicalMin = 0;
                     }
-                    if (character.Attribute.AttackPhysical[2] <= 0)
+                    if (character.Attribute.AttackPhysicalMax <= 0)
                     {
-                        character.Attribute.AttackPhysical[2] = 0;
+                        character.Attribute.AttackPhysicalMax = 0;
                     }
                     break;
 
                 case AttributeCode.Attack_Percent_Both:
-                    character.Attribute.AttackPercentPhysical += v*sign;
+                    character.Attribute.AttackPercentPhysical += f*sign;
                     if (character.Attribute.AttackPercentPhysical <= 0)
                     {
                         character.Attribute.AttackPercentPhysical = 0;
                     }
-                    character.Attribute.AttackPercentMagic += v*sign;
+                    character.Attribute.AttackPercentMagic += f*sign;
                     if (character.Attribute.AttackPercentMagic <= 0)
                     {
                         character.Attribute.AttackPercentMagic = 0;
@@ -315,7 +381,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                     break;
 
                 case AttributeCode.Attack_Percent_Physical:
-                    character.Attribute.AttackPercentPhysical += v*sign;
+                    character.Attribute.AttackPercentPhysical += f*sign;
                     if (character.Attribute.AttackPercentPhysical <= 0)
                     {
                         character.Attribute.AttackPercentPhysical = 0;
@@ -323,7 +389,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                     break;
 
                 case AttributeCode.Attack_Percent_Magic:
-                    character.Attribute.AttackPercentMagic += v*sign;
+                    character.Attribute.AttackPercentMagic += f*sign;
                     if (character.Attribute.AttackPercentMagic <= 0)
                     {
                         character.Attribute.AttackPercentMagic = 0;
@@ -331,41 +397,41 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                     break;
 
                 case AttributeCode.Defense_Both:
-                    character.Attribute.DefensePhysical[1] += (int) v*sign;
-                    if (character.Attribute.DefensePhysical[1] <= 0)
+                    character.Attribute.DefensePhysicalBase += i*sign;
+                    if (character.Attribute.DefensePhysicalBase <= 0)
                     {
-                        character.Attribute.DefensePhysical[1] = 0;
+                        character.Attribute.DefensePhysicalBase = 0;
                     }
-                    character.Attribute.DefenseMagic[1] += (int) v*sign;
-                    if (character.Attribute.DefenseMagic[1] <= 0)
+                    character.Attribute.DefenseMagicBase += i*sign;
+                    if (character.Attribute.DefenseMagicBase <= 0)
                     {
-                        character.Attribute.DefenseMagic[1] = 0;
+                        character.Attribute.DefenseMagicBase = 0;
                     }
                     break;
 
                 case AttributeCode.Defense_Physical:
-                    character.Attribute.DefensePhysical[1] += (int) v*sign;
-                    if (character.Attribute.DefensePhysical[1] <= 0)
+                    character.Attribute.DefensePhysicalBase += i*sign;
+                    if (character.Attribute.DefensePhysicalBase <= 0)
                     {
-                        character.Attribute.DefensePhysical[1] = 0;
+                        character.Attribute.DefensePhysicalBase = 0;
                     }
                     break;
 
                 case AttributeCode.Defense_Magic:
-                    character.Attribute.DefenseMagic[1] += (int) v*sign;
-                    if (character.Attribute.DefenseMagic[1] <= 0)
+                    character.Attribute.DefenseMagicBase += i*sign;
+                    if (character.Attribute.DefenseMagicBase <= 0)
                     {
-                        character.Attribute.DefenseMagic[1] = 0;
+                        character.Attribute.DefenseMagicBase = 0;
                     }
                     break;
 
                 case AttributeCode.Defense_Percent_Both:
-                    character.Attribute.DefensePercentPhysical += v*sign;
+                    character.Attribute.DefensePercentPhysical += f*sign;
                     if (character.Attribute.DefensePercentPhysical <= 0)
                     {
                         character.Attribute.DefensePercentPhysical = 0;
                     }
-                    character.Attribute.DefensePercentMagic += v*sign;
+                    character.Attribute.DefensePercentMagic += f*sign;
                     if (character.Attribute.DefensePercentMagic <= 0)
                     {
                         character.Attribute.DefensePercentMagic = 0;
@@ -373,7 +439,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                     break;
 
                 case AttributeCode.Defense_Percent_Physical:
-                    character.Attribute.DefensePercentPhysical += v*sign;
+                    character.Attribute.DefensePercentPhysical += f*sign;
                     if (character.Attribute.DefensePercentPhysical <= 0)
                     {
                         character.Attribute.DefensePercentPhysical = 0;
@@ -381,7 +447,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                     break;
 
                 case AttributeCode.Defense_Percent_Magic:
-                    character.Attribute.DefensePercentMagic += v*sign;
+                    character.Attribute.DefensePercentMagic += f*sign;
                     if (character.Attribute.DefensePercentMagic <= 0)
                     {
                         character.Attribute.DefensePercentMagic = 0;
@@ -389,18 +455,18 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                     break;
 
                 case AttributeCode.Life_Increase:
-                    character.Attribute.HitPoint[1] += (int) v*sign;
-                    if (character.Attribute.HitPoint[1] <= 0)
+                    character.Attribute.HitPointBase += i*sign;
+                    if (character.Attribute.HitPointBase <= 0)
                     {
-                        character.Attribute.HitPoint[1] = 0;
+                        character.Attribute.HitPointBase = 0;
                     }
                     break;
 
                 case AttributeCode.Mana_Increase:
-                    character.Attribute.Mana[1] += (int) v*sign;
-                    if (character.Attribute.Mana[1] <= 0)
+                    character.Attribute.ManaBase += i*sign;
+                    if (character.Attribute.ManaBase <= 0)
                     {
-                        character.Attribute.Mana[1] = 0;
+                        character.Attribute.ManaBase = 0;
                     }
                     break;
 
@@ -411,14 +477,14 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                 default:
                 {
                     string code = attribute.Key.ToString().Replace("_", "");
-                    Type type = typeof (Character.CharacterAttribute);
+                    Type type = typeof (CharacterAttribute);
 
                     if (code.Contains("Both"))
                     {
                         string physical = code.Replace("Both", "Physical");
                         var pi = type.GetProperty(physical);
                         float pv = (float) pi.GetValue(character.Attribute, null);
-                        pv += v*sign;
+                        pv += f*sign;
                         if (pv <= 0)
                         {
                             pv = 0;
@@ -428,7 +494,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                         string magic = code.Replace("Both", "Magic");
                         pi = type.GetProperty(magic);
                         float mv = (float) pi.GetValue(character.Attribute, null);
-                        mv += v*sign;
+                        mv += f*sign;
                         if (mv <= 0)
                         {
                             mv = 0;
@@ -442,7 +508,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                         foreach (var propertyInfo in pi)
                         {
                             int newv = (int) propertyInfo.GetValue(character.Attribute, null);
-                            newv += (int) v*sign;
+                            newv += i*sign;
                             if (newv <= 0)
                             {
                                 newv = 0;
@@ -457,7 +523,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                         if (t == typeof (int))
                         {
                             int newv = (int) pi.GetValue(character.Attribute, null);
-                            newv += (int) v*sign;
+                            newv += i*sign;
                             if (newv <= 0)
                             {
                                 newv = 0;
@@ -467,7 +533,13 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                         else if (t == typeof (float))
                         {
                             float newv = (float) pi.GetValue(character.Attribute, null);
-                            newv += v*sign;
+                            newv += f*sign;
+                            StreamWriter sw = File.AppendText(@"I:\Users\Administrator\Desktop\1.txt");
+                                sw.WriteLine(character.Attribute.SpeedAttack);
+                                sw.WriteLine(character.Attribute.AttackSpeed);
+                                sw.WriteLine("______");
+                                sw.Close();
+
                             if (newv <= 0)
                             {
                                 newv = 0;
@@ -480,43 +552,6 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
                     #endregion
             }
-        }
-
-        /// <summary>
-        /// 类型：方法
-        /// 名称：CalculateCharacterAttributes
-        /// 作者：taixihuase
-        /// 作用：重新计算角色的最终属性
-        /// 编写日期：2015/8/19
-        /// </summary>
-        /// <param name="character"></param>
-        protected void CalculateCharacterAttributes(Character.Character character)
-        {
-            character.Attribute.AttackPhysical[0] = (int)
-                ((character.Attribute.AttackPhysical[1] + character.Attribute.AttackPhysical[2])*
-                 (100 + character.Attribute.AttackPercentPhysical)*0.005);
-            character.Attribute.AttackMagic[0] =
-                (int) ((character.Attribute.AttackMagic[1] + character.Attribute.AttackMagic[2])*
-                       (100 + character.Attribute.AttackPercentMagic)*0.005);
-            character.Attribute.DefensePhysical[0] =
-                (int) (character.Attribute.DefensePhysical[1]*
-                       (100 + character.Attribute.DefensePercentPhysical)*0.01);
-            character.Attribute.DefenseMagic[0] =
-                (int) (character.Attribute.DefenseMagic[1]*
-                       (100 + character.Attribute.DefensePercentMagic)*0.01);
-            character.Attribute.HitPoint[0] =
-                (int) (character.Attribute.HitPoint[1]*
-                       (100 + character.Attribute.LifeIncreasePercent)*0.01);
-            character.Attribute.Mana[0] =
-                (int) (character.Attribute.Mana[1]*
-                       (100 + character.Attribute.ManaIncreasePercent)*0.01);
-            character.Attribute.AttackSpeed += character.Attribute.SpeedAttack;
-            character.Attribute.SkillCooldownSpeed = DataConstraint.CharacterDefaultSkillCooldownSpeed -
-                                                     character.Attribute.SpeedCooldown;
-            character.Attribute.MovementSpeed = DataConstraint.CharacterDefaultMovementSpeed +
-                                                character.Attribute.SpeedMovement;
-            character.Attribute.ExperienceGainSpeed = DataConstraint.CharacterDefaultExperienceGainSpeed +
-                                                      character.Attribute.SpeedExperience;
         }
 
         #endregion
@@ -533,7 +568,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         /// <param name="level"></param>
         /// <param name="attribute"></param>
         /// <param name="value"></param>
-        protected virtual void UpdateForgingAttribute(int level, AttributeCode attribute, float value)
+        protected virtual void UpdateForgingAttribute(int level, AttributeCode attribute, ValueType value)
         {
         }
 
@@ -546,7 +581,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         /// </summary>
         /// <param name="attribute"></param>
         /// <param name="value"></param>
-        protected virtual void UpgradeForgingAttribute(AttributeCode attribute, float value)
+        protected virtual void UpgradeForgingAttribute(AttributeCode attribute, ValueType value)
         {
         }
 

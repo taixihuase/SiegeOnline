@@ -92,13 +92,15 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         /// <param name="name"></param>
         /// <param name="occupation"></param>
         /// <param name="limit"></param>
+        /// <param name="upgrade"></param>
         /// <param name="cur"></param>
         /// <param name="dur"></param>
         /// <param name="type"></param>
         /// <param name="jewelAttributeType"></param>
-        public Jewel(int fixedId, int allocatedId, string name, OccupationCode occupation, int limit, int cur, int dur,
+        public Jewel(int fixedId, int allocatedId, string name, OccupationCode occupation, int limit, bool upgrade,
+            int cur, int dur,
             JewelType type, JewelAttributeType jewelAttributeType)
-            : base(fixedId, allocatedId, name, occupation, limit, cur, dur, EquipmentType.Jewel)
+            : base(fixedId, allocatedId, name, occupation, limit, upgrade, cur, dur, EquipmentType.Jewel)
         {
             Type = (byte) type;
             JewelAttribute = jewelAttributeType;
@@ -127,11 +129,15 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         /// 编写日期：2015/8/16
         /// </summary>
         /// <param name="value"></param>
-        public void UpdateSpecialAttribute(float value)
+        public void UpdateSpecialAttribute(ValueType value)
         {
-            if (value > 0)
+            if (value != null)
             {
-                SpecialAttribute = new KeyValuePair<JewelAttributeType, float>(JewelAttribute, value);
+                float f = Convert.ToSingle(value.ToString());
+                if (f > 0)
+                {
+                    SpecialAttribute = new KeyValuePair<JewelAttributeType, float>(JewelAttribute, f);
+                }
             }
         }
 

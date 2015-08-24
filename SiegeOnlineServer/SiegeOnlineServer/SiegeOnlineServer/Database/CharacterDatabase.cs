@@ -71,29 +71,38 @@ namespace SiegeOnlineServer.Database
                 character.Occupation.BaseManaRecovery = 1;
                 character.Occupation.Apply(character.Attribute);
 
-                Weapon w = new Weapon(1, 2, "刀", OccupationCode.Warrior | OccupationCode.Paladin, 1, 1,
-                    DataConstraint.EquipmentMaxDurability, Weapon.WeaponType.Null, Weapon.WeaponAttributeType.Physical);
+                Weapon w = new Weapon(1, 2, "刀", OccupationCode.Warrior | OccupationCode.Paladin, 1, true, 1,
+                    DataConstraint.EquipmentMaxDurability, 0, 200, 200, Weapon.WeaponType.Null,
+                    Weapon.WeaponAttackType.Physical,
+                    Weapon.WeaponElementType.Null);
+
                 character.Weapons.Add(1, w);
                 w.UpdateAttackLimit(100, 200, null, null);
-                w.AddFixedAttribute(AttributeCode.Attack_Physical, 100);
-                w.AddFixedAttribute(AttributeCode.Attack_Percent_Both, 10);
+                w.UpdateFixedAttribute(AttributeCode.Attack_Physical, 100);
+                w.UpdateFixedAttribute(AttributeCode.Attack_Percent_Both, 10);
                 w.Upgrade();
                 w.Upgrade();
                 w.Upgrade(AttributeCode.Attack_Percent_Both, 90);
+                w.UpdateElementAttribute(Weapon.WeaponElementType.Lightning);
+                w.UpgradeElementAttribute(0);
+                w.UpgradeElementEnhanceAttribute(300);
+                w.UpgradeElementExtraAttribute(10, 2);
 
-                Armor a = new Armor(10, 20, "头盔", OccupationCode.Warrior, 1, 1, DataConstraint.EquipmentMaxDurability,
-                    Armor.ArmorType.Helmet);
+                Armor a = new Armor(10, 20, "头盔", OccupationCode.Warrior, 1, true, 1,
+                    DataConstraint.EquipmentMaxDurability, Armor.ArmorType.Helmet);
+
                 character.Armors.Add(1, a);
                 a.UpdateDefensePoints(1000, 2000);
-                a.AddFixedAttribute(AttributeCode.Life_Increase, 1000);
-                a.Upgrade();
-                a.Upgrade(AttributeCode.Life_Increase_Percent, 50);
+                //a.UpdateFixedAttribute(AttributeCode.Life_Increase, 1000);
+                //a.Upgrade();
+                //a.Upgrade(AttributeCode.Life_Increase_Percent, 50);
 
-                Jewel j = new Jewel(100, 200, "戒指", OccupationCode.Common, 1, 1, DataConstraint.EquipmentMaxDurability,
-                    Jewel.JewelType.Ring, Jewel.JewelAttributeType.Null);
+                Jewel j = new Jewel(100, 200, "戒指", OccupationCode.Common, 1, false, 1,
+                    DataConstraint.EquipmentMaxDurability, Jewel.JewelType.Ring, Jewel.JewelAttributeType.Null);
+
                 character.Jewels.Add(1, j);
-                j.AddFixedAttribute(AttributeCode.Resistance_All, 22222);
-
+                j.UpdateFixedAttribute(AttributeCode.Resistance_All, 22222);
+                j.UpdateRandomAttribute(AttributeCode.Attr_Strength, 1234);
 
                 #endregion
 
@@ -181,7 +190,7 @@ namespace SiegeOnlineServer.Database
         /// <param name="character"></param>
         public void SaveCharacterToDatabase(Character character)
         {
-            
+
         }
     }
 }

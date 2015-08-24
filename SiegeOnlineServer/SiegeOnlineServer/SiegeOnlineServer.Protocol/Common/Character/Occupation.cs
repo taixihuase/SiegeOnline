@@ -90,10 +90,10 @@ namespace SiegeOnlineServer.Protocol.Common.Character
         {
             if (!_apply)
             {
-                attribute.HitPoint[1] += BaseHitPoint;
-                attribute.HitPoint[0] = (int) (attribute.HitPoint[1]*(100 + attribute.LifeIncreasePercent)*0.01);
-                attribute.Mana[1] += BaseMana;
-                attribute.Mana[0] = (int) (attribute.Mana[1]*(100 + attribute.ManaIncreasePercent)*0.01);
+                attribute.HitPointBase += BaseHitPoint;
+                attribute.HitPoint = (int) (attribute.HitPointBase*(100 + attribute.LifeIncreasePercent)*0.01);
+                attribute.ManaBase += BaseMana;
+                attribute.Mana = (int) (attribute.ManaBase*(100 + attribute.ManaIncreasePercent)*0.01);
                 attribute.LifeRecovery += BaseLifeRecovery;
                 attribute.ManaRecovery += BaseManaRecovery;
                 _apply = true;
@@ -112,10 +112,10 @@ namespace SiegeOnlineServer.Protocol.Common.Character
         {
             if (_apply)
             {
-                attribute.HitPoint[1] -= BaseHitPoint;
-                attribute.HitPoint[0] = (int) (attribute.HitPoint[1]*(100 + attribute.LifeIncreasePercent)*0.01);
-                attribute.Mana[1] -= BaseMana;
-                attribute.Mana[0] = (int) (attribute.Mana[1]*(100 + attribute.ManaIncreasePercent)*0.01);
+                attribute.HitPointBase -= BaseHitPoint;
+                attribute.HitPoint = (int) (attribute.HitPointBase*(100 + attribute.LifeIncreasePercent)*0.01);
+                attribute.ManaBase -= BaseMana;
+                attribute.Mana = (int) (attribute.ManaBase*(100 + attribute.ManaIncreasePercent)*0.01);
                 attribute.LifeRecovery -= BaseLifeRecovery;
                 attribute.ManaRecovery -= BaseManaRecovery;
                 _apply = false;

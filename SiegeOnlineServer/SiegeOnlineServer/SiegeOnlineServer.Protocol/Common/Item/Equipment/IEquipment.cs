@@ -19,6 +19,8 @@
 //
 //----------------------------------------------------------------------------------------------------------
 
+using System;
+
 namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 {
     /// <summary>
@@ -39,7 +41,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         /// <param name="attribute"></param>
         /// <param name="value"></param>
         /// </summary>
-        void Upgrade(AttributeCode attribute = AttributeCode.Null, float value = 0);
+        void Upgrade(AttributeCode attribute = AttributeCode.Null, ValueType value = null);
 
         /// <summary>
         /// 类型：方法
