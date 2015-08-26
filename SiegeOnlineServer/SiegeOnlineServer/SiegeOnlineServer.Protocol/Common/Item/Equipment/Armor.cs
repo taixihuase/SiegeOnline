@@ -56,7 +56,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             Helmet,
         }
 
-        public byte Type { get; protected set; } // 防具类型
+        public ArmorType Type { get; protected set; } // 防具类型
 
         #endregion
 
@@ -76,14 +76,16 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         /// <param name="name"></param>
         /// <param name="occupation"></param>
         /// <param name="limit"></param>
+        /// <param name="upgrade"></param>
         /// <param name="cur"></param>
         /// <param name="dur"></param>
         /// <param name="type"></param>
-        public Armor(int fixedId, int allocatedId, string name, OccupationCode occupation, int limit, int cur, int dur,
+        public Armor(int fixedId, int allocatedId, string name, OccupationCode occupation, int limit, bool upgrade,
+            int cur, int dur,
             ArmorType type)
-            : base(fixedId, allocatedId, name, occupation, limit, cur, dur, EquipmentType.Armor)
+            : base(fixedId, allocatedId, name, occupation, limit, upgrade, cur, dur, EquipmentType.Armor)
         {
-            Type = (byte) type;
+            Type = type;
             DefensePoints = new[] {0, 0};
             ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, float>>
             {
@@ -100,10 +102,11 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         /// </summary>
         public Armor()
         {
+            Type = ArmorType.Null;
             DefensePoints = new[] {0, 0};
             ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, float>>
             {
-                {-1, new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0)}
+                {-1, new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 10)}
             };
         }
 
@@ -127,7 +130,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         #region IEquipment接口实现
 
-        public void Upgrade(AttributeCode attribute = AttributeCode.Null, float value = 0)
+        public void Upgrade(AttributeCode attribute = AttributeCode.Null, ValueType value = null)
         {
             UpgradeForgingAttribute(attribute, value);
             UpgradeCurrentLevel();
@@ -143,20 +146,28 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         #region 重载抽象基类方法
 
-        protected override void UpdateForgingAttribute(int level, AttributeCode attribute, float value)
+        protected override void UpdateForgingAttribute(int level, AttributeCode attribute, ValueType value)
         {
-            if (ForgingAttributes.ContainsKey(level) && !attribute.Equals(AttributeCode.Null) && Math.Abs(value) > 0)
+            if (ForgingAttributes.ContainsKey(level) && !attribute.Equals(AttributeCode.Null) &&
+                            value != null)
             {
-                ForgingAttributes[level] = new KeyValuePair<AttributeCode, float>(attribute, value);
+                float f = Convert.ToSingle(value.ToString());
+                if (f > 0)
+                {
+                    ForgingAttributes[level] = new KeyValuePair<AttributeCode, float>(attribute, f);
+                }
             }
         }
 
-        protected override void UpgradeForgingAttribute(AttributeCode attribute, float value)
+        protected override void UpgradeForgingAttribute(AttributeCode attribute, ValueType value)
         {
-            if (CurrentLevel < DataConstraint.EquipmentMaxLevel && !attribute.Equals(AttributeCode.Null) &&
-                Math.Abs(value) > 0)
+            if (CurrentLevel < DataConstraint.EquipmentMaxLevel && !attribute.Equals(AttributeCode.Null) && value != null)
             {
-                ForgingAttributes[CurrentLevel + 1] = new KeyValuePair<AttributeCode, float>(attribute, value);
+                float f = Convert.ToSingle(value.ToString());
+                if (f > 0)
+                {
+                    ForgingAttributes[CurrentLevel + 1] = new KeyValuePair<AttributeCode, float>(attribute, f);
+                }
             }
         }
 
@@ -172,16 +183,17 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         {
             if (base.Apply(character))
             {
-                character.Attribute.DefensePhysical[1] += DefensePoints[0];
-                character.Attribute.DefenseMagic[1] += DefensePoints[1];
+                character.Attribute.DefensePhysicalBase += DefensePoints[0];
+                character.Attribute.DefenseMagicBase += DefensePoints[1];
                 foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
                 {
                     if (attribute.Key > 0)
                     {
                         UpdateCharacterAttribute(character, attribute.Value, true);
                     }
+
                 }
-                CalculateCharacterAttributes(character);
+                character.Attribute.CalculateAttributes();
                 return true;
             }
             return false;
@@ -191,8 +203,8 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         {
             if (base.Cancel(character))
             {
-                character.Attribute.DefensePhysical[1] -= DefensePoints[0];
-                character.Attribute.DefenseMagic[1] -= DefensePoints[1];
+                character.Attribute.DefensePhysicalBase -= DefensePoints[0];
+                character.Attribute.DefenseMagicBase -= DefensePoints[1];
                 foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
                 {
                     if (attribute.Key > 0)
@@ -200,7 +212,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                         UpdateCharacterAttribute(character, attribute.Value, false);
                     }
                 }
-                CalculateCharacterAttributes(character);
+                character.Attribute.CalculateAttributes();
                 return true;
             }
             return false;

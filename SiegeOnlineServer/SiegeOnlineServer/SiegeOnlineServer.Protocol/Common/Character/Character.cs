@@ -21,8 +21,8 @@
 
 using System;
 using System.Collections.Generic;
-using SiegeOnlineServer.Protocol.Common.Item;
 using SiegeOnlineServer.Protocol.Common.Item.Equipment;
+using SiegeOnlineServer.Protocol.Common.Skill;
 using SiegeOnlineServer.Protocol.Common.User;
 
 namespace SiegeOnlineServer.Protocol.Common.Character
@@ -35,25 +35,25 @@ namespace SiegeOnlineServer.Protocol.Common.Character
     /// 编写日期：2015/7/22
     /// </summary>
     [Serializable]
-    public class Character : UserBase
+    public class Character : UserInfo
     {
         public DateTime WorldEnterTime { get; set; }
 
         public Position Position { get; set; } // 位置信息
 
-        public Experience Experience { get; set; }  // 经验信息
+        public Experience Experience { get; set; } // 经验信息
 
-        public Occupation Occupation { get; set; }                          // 职业属性
+        public Occupation Occupation { get; set; } // 职业属性
 
-        public CharacterAttribute Attribute { get; set; }                   // 角色属性
+        public CharacterAttribute Attribute { get; set; } // 角色属性
 
-        public Dictionary<int, Weapon> Weapons;                             // 武器清单
+        public WeaponCollection Weapons { get; set; } // 武器清单
 
-        public Dictionary<int, Armor> Armors;                               // 防具清单
+        public ArmorCollection Armors { get; set; } // 防具清单
 
-        public Dictionary<int, Jewel> Jewels;                               // 饰品清单 
+        public JewelCollection Jewels { get; set; } // 饰品清单 
 
-        public Dictionary<int, Skill> Skills;                               // 技能清单 
+        public SkillCollection Skills { get; set; } // 技能清单 
 
         /// <summary>
         /// 类型：方法
@@ -63,16 +63,16 @@ namespace SiegeOnlineServer.Protocol.Common.Character
         /// 编写日期：2015/7/22
         /// </summary>
         /// <param name="user"></param>
-        public Character(UserBase user) : base(user)
+        public Character(UserInfo user) : base(user)
         {
             Position = new Position();
             Experience = new Experience();
             Occupation = new Occupation();
             Attribute = new CharacterAttribute();
-            Weapons = new Dictionary<int, Weapon> {{-1, new Weapon()}};
-            Armors = new Dictionary<int, Armor> {{-1, new Armor()}};
-            Jewels = new Dictionary<int, Jewel> {{-1, new Jewel()}};
-            Skills = new Dictionary<int, Skill> {{-1, new Skill()}};
+            Weapons = new WeaponCollection();
+            Armors = new ArmorCollection();
+            Jewels = new JewelCollection();
+            Skills = new SkillCollection();
         }
 
         /// <summary>
@@ -83,7 +83,8 @@ namespace SiegeOnlineServer.Protocol.Common.Character
         /// 编写日期：2015/8/20
         /// </summary>
         /// <param name="character"></param>
-        public Character(Character character) : base(character.Guid,character.Account,character.UniqueId,character.Nickname,character.Status)
+        public Character(Character character)
+            : base(character.Guid, character.Account, character.UniqueId, character.Nickname, character.Status)
         {
             WorldEnterTime = character.WorldEnterTime;
             Position = character.Position;
@@ -94,7 +95,7 @@ namespace SiegeOnlineServer.Protocol.Common.Character
             Jewels = character.Jewels;
             Skills = character.Skills;
             Attribute = new CharacterAttribute();
-            Type type = character.GetType();
+            Type type = character.Attribute.GetType();
             var pi = type.GetProperties();
             foreach (var info in pi)
             {
@@ -111,27 +112,9 @@ namespace SiegeOnlineServer.Protocol.Common.Character
         /// </summary>
         public void ApplyEquipments()
         {
-            foreach (KeyValuePair<int, Armor> pair in Armors)
-            {
-                if (pair.Key > 0)
-                {
-                    pair.Value.Apply(this);
-                }
-            }
-            foreach (KeyValuePair<int, Jewel> pair in Jewels)
-            {
-                if (pair.Key > 0)
-                {
-                    pair.Value.Apply(this);
-                }
-            }
-            foreach (KeyValuePair<int, Weapon> pair in Weapons)
-            {
-                if (pair.Key > 0)
-                {
-                    pair.Value.Apply(this);
-                }
-            }
+            Armors.Apply(this);
+            Jewels.Apply(this);
+            Weapons.Apply(this);
         }
 
         /// <summary>
@@ -143,27 +126,9 @@ namespace SiegeOnlineServer.Protocol.Common.Character
         /// </summary>
         public void CancelEquipments()
         {
-            foreach (KeyValuePair<int, Armor> pair in Armors)
-            {
-                if (pair.Key > 0)
-                {
-                    pair.Value.Cancel(this);
-                }
-            }
-            foreach (KeyValuePair<int, Jewel> pair in Jewels)
-            {
-                if (pair.Key > 0)
-                {
-                    pair.Value.Cancel(this);
-                }
-            }
-            foreach (KeyValuePair<int, Weapon> pair in Weapons)
-            {
-                if (pair.Key > 0)
-                {
-                    pair.Value.Cancel(this);
-                }
-            }
+            Armors.Cancel(this);
+            Jewels.Cancel(this);
+            Weapons.Cancel(this);
         }
     }
 }

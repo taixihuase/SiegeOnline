@@ -35,12 +35,32 @@ namespace SiegeOnlineClient.Data.Player
     /// </summary>
     public class PlayerData
     {
-        public UserBase User { get; set; }
-        public Character Character { get; set; }
+        public UserInfo User { get; protected set; }
 
-        public PlayerData()
+        public Character CharacterOriginal { get; protected set; }
+
+        public Character CharacterCopy { get; set; }
+
+        public void SetUserInfo(UserInfo user)
         {
+            User = user;
+        }
 
+        public void SetCharacterOriginal(Character original)
+        {
+            CharacterOriginal = new Character(original);
+        }
+
+        public void SetCharacterCopy(Character copy)
+        {
+            CharacterCopy = new Character(copy);
+        }
+
+        public void SetCharacter(Character original, Character copy)
+        {
+            SetUserInfo(new UserInfo(original.Guid, original.Account, original.UniqueId, original.Nickname, original.Status));
+            SetCharacterOriginal(original);
+            SetCharacterCopy(copy);
         }
     }
 }

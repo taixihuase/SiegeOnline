@@ -101,7 +101,7 @@ namespace SiegeOnlineClient.ClientLogic
 
         public void OnWorldEnter(object sender, WorldEnterEventArgs e)
         {
-            if (e.MyCharacter != null)
+            if (e.MyCharacterPosition != null)
             {
                 if (MyWorldEnter != null)
                 {

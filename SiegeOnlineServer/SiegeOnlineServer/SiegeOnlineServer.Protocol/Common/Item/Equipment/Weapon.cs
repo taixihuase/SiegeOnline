@@ -21,7 +21,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 
+// ReSharper disable AssignNullToNotNullAttribute
 // ReSharper disable InconsistentNaming
 
 namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
@@ -51,7 +54,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             Null,
         }
 
-        public byte Type { get; protected set; } // 武器类型
+        public WeaponType Type { get; protected set; } // 武器类型
 
         #endregion
 
@@ -59,30 +62,91 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         /// <summary>
         /// 类型：枚举
-        /// 名称：WeaponAttributeType
+        /// 名称：WeaponAttackType
         /// 作者：taixihuase
         /// 作用：武器攻击属性类型枚举
         /// 编写日期：2015/8/16
         /// </summary>
         [Serializable]
-        public enum WeaponAttributeType
+        public enum WeaponAttackType : byte
         {
             Both,
             Magic,
             Physical
         }
 
-        public byte WeaponAttribute { get; protected set; } // 武器攻击属性类型
+        public WeaponAttackType WeaponAttack { get; protected set; } // 武器攻击属性类型
 
-        public Dictionary<int, KeyValuePair<int, int>> AttackLimit; // 攻击力上下限
+        public Dictionary<WeaponAttackType, KeyValuePair<int, int>> AttackLimit; // 攻击力上下限
+
+        #endregion
+
+        #region 元素属性类型
+
+        /// <summary>
+        /// 类型：枚举
+        /// 名称：WeaponElementType
+        /// 作者：taixihuase
+        /// 作用：武器元素属性类型枚举
+        /// 编写日期：2015/8/22
+        /// </summary>
+        [Serializable]
+        public enum WeaponElementType : byte
+        {
+            Null,
+            Fire,
+            Frost,
+            Lightning,
+            Poison,
+            Rock,
+            Shadow,
+            Storm
+        }
+
+        /// <summary>
+        /// 类型：枚举
+        /// 名称：ElementExtraAttribute
+        /// 作者：taixihuase
+        /// 作用：武器元素附加属性类型
+        /// 编写日期：2015/8/22
+        /// </summary>
+        [Serializable]
+        protected enum ElementExtraAttribute : byte
+        {
+            Null,
+
+            Attack_Percent_Both,
+            Life_Increase_Percent,
+            Crit_Both,
+            Life_Steal,
+            Defense_Percent_Both,
+            Dodge_Both,
+            Hit_Both,
+
+            Penetration,
+            Immunity,
+            Speed_Attack,
+            Feedback,
+            Rebound,
+            Speed_Cooldown,
+            Speed_Movement
+        }
+
+        public WeaponElementType WeaponElement { get; set; } // 武器元素属性类型
+
+        public int CurrentElementEnergy { get; set; } // 当前元素能量值
+
+        public int MaxElementEnergy { get; protected set; } // 最大元素能量值
+ 
+        public KeyValuePair<WeaponElementType, Dictionary<AttributeCode, float>> ElementAttributes; // 元素附加属性 
 
         #endregion
 
         #region 其余武器固有属性
 
-        public int FixedAttackSpeed { get; protected set; } // 武器攻击速度
+        public float FixedAttackSpeed { get; protected set; } // 武器攻击速度
 
-        public int FixedAttackDistance { get; protected set; } // 武器攻击射程
+        public float FixedAttackDistance { get; protected set; } // 武器攻击射程
 
         #endregion
 
@@ -100,37 +164,89 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         /// <param name="name"></param>
         /// <param name="occupation"></param>
         /// <param name="limit"></param>
+        /// <param name="upgrade"></param>
         /// <param name="cur"></param>
         /// <param name="dur"></param>
+        /// <param name="elem"></param>
+        /// <param name="distance"></param>
         /// <param name="type"></param>
-        /// <param name="weaponAttributeType"></param>
-        public Weapon(int fixedId, int allocatedId, string name, OccupationCode occupation, int limit, int cur, int dur,
-            WeaponType type, WeaponAttributeType weaponAttributeType)
-            : base(fixedId, allocatedId, name, occupation, limit, cur, dur, EquipmentType.Weapon)
+        /// <param name="weaponAttackType"></param>
+        /// <param name="weaponElement"></param>
+        /// <param name="speed"></param>
+        public Weapon(int fixedId, int allocatedId, string name, OccupationCode occupation, int limit, bool upgrade,
+            int cur, int dur, int elem, float speed, float distance, 
+            WeaponType type, WeaponAttackType weaponAttackType, WeaponElementType weaponElement)
+            : base(fixedId, allocatedId, name, occupation, limit, upgrade, cur, dur, EquipmentType.Weapon)
         {
-            Type = (byte) type;
-            WeaponAttribute = (byte) weaponAttributeType;
+            Type = type;
 
-            if (weaponAttributeType == WeaponAttributeType.Both)
+            #region 武器属性初始化
+
+            WeaponAttack = weaponAttackType;
+            if (weaponAttackType == WeaponAttackType.Both)
             {
-                AttackLimit = new Dictionary<int, KeyValuePair<int, int>>
-                {
-                    [(int) WeaponAttributeType.Magic] = new KeyValuePair<int, int>(0, 0),
-                    [(int) WeaponAttributeType.Physical] = new KeyValuePair<int, int>(0, 0)
-                };
+                AttackLimit =
+                    new Dictionary<WeaponAttackType, KeyValuePair<int, int>>(new EnumComparer<WeaponAttackType>())
+                    {
+                        [WeaponAttackType.Magic] = new KeyValuePair<int, int>(0, 0),
+                        [WeaponAttackType.Physical] = new KeyValuePair<int, int>(0, 0)
+                    };
             }
             else
             {
-                AttackLimit = new Dictionary<int, KeyValuePair<int, int>>
-                {
-                    [(int) weaponAttributeType] = new KeyValuePair<int, int>(0, 0)
-                };
+                AttackLimit =
+                    new Dictionary<WeaponAttackType, KeyValuePair<int, int>>(new EnumComparer<WeaponAttackType>())
+                    {
+                        [weaponAttackType] = new KeyValuePair<int, int>(0, 0)
+                    };
             }
+
+            #endregion
 
             ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, float>>
             {
                 {-1, new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0)}
             };
+            FixedAttackSpeed = speed;
+            FixedAttackDistance = distance;
+
+            #region 武器元素初始化
+
+            WeaponElement = weaponElement;
+            CurrentElementEnergy = elem;
+            if (weaponElement != WeaponElementType.Null)
+            {
+                ElementAttributes =
+                    new KeyValuePair<WeaponElementType, Dictionary<AttributeCode, float>>(weaponElement,
+                        new Dictionary<AttributeCode, float>(new EnumComparer<AttributeCode>())
+                        {
+                            {(AttributeCode) Enum.Parse(typeof (AttributeCode), "Enhance_" + weaponElement), 0}
+                        });
+
+                int num = Convert.ToInt32(Enum.Parse(typeof (WeaponElementType), weaponElement.ToString()));
+                int mul = 0;
+                while ((num += mul*DataConstraint.ElementMaxSize) <=
+                       Enum.GetValues(typeof (ElementExtraAttribute)).Length)
+                {
+                    var s = Enum.GetName(typeof (ElementExtraAttribute), num);
+                    if (s != null)
+                    {
+                        ElementAttributes.Value.Add((AttributeCode) Enum.Parse(typeof (AttributeCode), s), 0);
+                    }
+                    mul++;
+                }
+            }
+            else
+            {
+                ElementAttributes =
+                    new KeyValuePair<WeaponElementType, Dictionary<AttributeCode, float>>(WeaponElementType.Null,
+                        new Dictionary<AttributeCode, float>(new EnumComparer<AttributeCode>())
+                        {
+                            {AttributeCode.Null, 0}
+                        });
+            }
+
+            #endregion
         }
 
         /// <summary>
@@ -142,18 +258,25 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         /// </summary>
         public Weapon()
         {
-            Type = (byte) WeaponType.Null;
-            WeaponAttribute = (int)WeaponAttributeType.Both;
-            AttackLimit = new Dictionary<int, KeyValuePair<int, int>>
+            Type = WeaponType.Null;
+            WeaponAttack = WeaponAttackType.Both;
+            AttackLimit = new Dictionary<WeaponAttackType, KeyValuePair<int, int>>(new EnumComparer<WeaponAttackType>())
             {
-                {(int) WeaponAttributeType.Physical, new KeyValuePair<int, int>(0, 0)},
-                {(int) WeaponAttributeType.Magic, new KeyValuePair<int, int>(1, 1)}
+                {WeaponAttackType.Both, new KeyValuePair<int, int>(0, 0)}
             };
-
+            WeaponElement = WeaponElementType.Null;
+            ElementAttributes =
+                new KeyValuePair<WeaponElementType, Dictionary<AttributeCode, float>>(WeaponElementType.Null,
+                    new Dictionary<AttributeCode, float>(new EnumComparer<AttributeCode>())
+                    {
+                        {AttributeCode.Null, 0}
+                    });
             ForgingAttributes = new Dictionary<int, KeyValuePair<AttributeCode, float>>
             {
                 {-1, new KeyValuePair<AttributeCode, float>(AttributeCode.Null, 0)}
             };
+            FixedAttackSpeed = DataConstraint.CharacterDefaultAttackSpeed;
+            FixedAttackDistance = DataConstraint.CharacterDefaultAttackDistance;
         }
 
         /// <summary>
@@ -171,25 +294,119 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         {
             if (physicalMin.HasValue && physicalMax.HasValue)
             {
-                if (AttackLimit.ContainsKey((int) WeaponAttributeType.Physical))
+                if (AttackLimit.ContainsKey(WeaponAttackType.Physical))
                 {
-                    AttackLimit[(int) WeaponAttributeType.Physical] = new KeyValuePair<int, int>(physicalMin.Value,
+                    AttackLimit[WeaponAttackType.Physical] = new KeyValuePair<int, int>(physicalMin.Value,
                         physicalMax.Value);
                 }
             }
             if (magicMin.HasValue && magicMax.HasValue)
             {
-                if (AttackLimit.ContainsKey((int) WeaponAttributeType.Magic))
+                if (AttackLimit.ContainsKey(WeaponAttackType.Magic))
                 {
-                    AttackLimit[(int) WeaponAttributeType.Magic] = new KeyValuePair<int, int>(magicMin.Value,
+                    AttackLimit[WeaponAttackType.Magic] = new KeyValuePair<int, int>(magicMin.Value,
                         magicMax.Value);
                 }
             }
         }
 
+
+        #region 元素属性操作相关方法
+
+        public void ClearElementAttribute()
+        {
+            WeaponElement = WeaponElementType.Null;
+            CurrentElementEnergy = 0;
+            ElementAttributes =
+                new KeyValuePair<WeaponElementType, Dictionary<AttributeCode, float>>(WeaponElementType.Null,
+                    new Dictionary<AttributeCode, float>(new EnumComparer<AttributeCode>())
+                    {
+                        {AttributeCode.Null, 0}
+                    });
+        }
+
+        public void UpgradeElementAttribute(int value)
+        {
+            if (WeaponElement != WeaponElementType.Null)
+            {
+                if (CurrentElementEnergy < DataConstraint.WeaponMaxElementEnergy)
+                {
+                    UpgradeElementEnergy(value);
+                }
+            }
+        }
+
+        private void UpgradeElementEnergy(int value)
+        {
+            CurrentElementEnergy += value;
+            if (CurrentElementEnergy >= DataConstraint.WeaponMaxElementEnergy)
+            {
+                CurrentElementEnergy = DataConstraint.WeaponMaxElementEnergy;
+            }
+        }
+
+        public void UpdateElementAttribute(WeaponElementType weaponElement)
+        {
+            ClearElementAttribute();
+            AddElementAttribute(weaponElement);
+        }
+
+        private void AddElementAttribute(WeaponElementType weaponElement)
+        {
+            if (weaponElement != WeaponElementType.Null)
+            {
+                WeaponElement = weaponElement;
+                ElementAttributes =
+                    new KeyValuePair<WeaponElementType, Dictionary<AttributeCode, float>>(weaponElement,
+                        new Dictionary<AttributeCode, float>(new EnumComparer<AttributeCode>())
+                        {
+                            {(AttributeCode) Enum.Parse(typeof (AttributeCode), "Enhance_" + weaponElement), 0}
+                        });
+
+                int num = Convert.ToInt32(Enum.Parse(typeof(WeaponElementType), weaponElement.ToString()));
+                int mul = 0;
+                while ((num += mul * DataConstraint.ElementMaxSize) <=
+                       Enum.GetValues(typeof(ElementExtraAttribute)).Length)
+                {
+                    var s = Enum.GetName(typeof(ElementExtraAttribute), num);
+                    if (s != null)
+                    {
+                        ElementAttributes.Value.Add((AttributeCode)Enum.Parse(typeof(AttributeCode), s), 0);
+                    }
+                    mul++;
+                }
+            }
+        }
+
+        public void UpgradeElementEnhanceAttribute(int value)
+        {
+            if (WeaponElement != WeaponElementType.Null)
+            {
+                AttributeCode enhance = (AttributeCode)Enum.Parse(typeof(AttributeCode), "Enhance_" + WeaponElement);
+                ElementAttributes.Value[enhance] = ElementAttributes.Value[enhance] + value;
+            }
+        }
+
+        public void UpgradeElementExtraAttribute(float value, int order)
+        {
+            if (WeaponElement != WeaponElementType.Null)
+            {
+                int num = Convert.ToInt32(Enum.Parse(typeof (WeaponElementType), WeaponElement.ToString())) +
+                          (order - 1)*DataConstraint.ElementMaxSize;
+                if (num > 0 && num <= Enum.GetValues(typeof(ElementExtraAttribute)).Length)
+                {
+                    string extra = Enum.GetName(typeof(ElementExtraAttribute), num);
+                    AttributeCode attr = (AttributeCode)Enum.Parse(typeof(AttributeCode), extra);
+                    ElementAttributes.Value[attr] = ElementAttributes.Value[attr] + value;     
+                }
+            }
+        }
+
+        #endregion
+
         #region IEquipment接口实现
 
-        public void Upgrade(AttributeCode attribute = AttributeCode.Null, float value = 0)
+        public void Upgrade(AttributeCode attribute = AttributeCode.Null, ValueType value = null)
         {
             UpgradeForgingAttribute(attribute, value);
             UpgradeCurrentLevel();
@@ -205,20 +422,28 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 
         #region 重载抽象基类方法
 
-        protected override void UpdateForgingAttribute(int level, AttributeCode attribute, float value)
+        protected override void UpdateForgingAttribute(int level, AttributeCode attribute, ValueType value)
         {
-            if (ForgingAttributes.ContainsKey(level) && !attribute.Equals(AttributeCode.Null) && Math.Abs(value) > 0)
+            if (ForgingAttributes.ContainsKey(level) && !attribute.Equals(AttributeCode.Null) &&
+                value != null)
             {
-                ForgingAttributes[level] = new KeyValuePair<AttributeCode, float>(attribute, value);
+                float f = Convert.ToSingle(value.ToString());
+                if (f > 0)
+                {
+                    ForgingAttributes[level] = new KeyValuePair<AttributeCode, float>(attribute, f);
+                }
             }
         }
 
-        protected override void UpgradeForgingAttribute(AttributeCode attribute, float value)
+        protected override void UpgradeForgingAttribute(AttributeCode attribute, ValueType value)
         {
-            if (CurrentLevel < DataConstraint.EquipmentMaxLevel && !attribute.Equals(AttributeCode.Null) &&
-                Math.Abs(value) > 0)
+            if (CurrentLevel < DataConstraint.EquipmentMaxLevel && !attribute.Equals(AttributeCode.Null) && value != null)
             {
-                ForgingAttributes[CurrentLevel + 1] = new KeyValuePair<AttributeCode, float>(attribute, value);
+                float f = Convert.ToSingle(value.ToString());
+                if (f > 0)
+                {
+                    ForgingAttributes[CurrentLevel + 1] = new KeyValuePair<AttributeCode, float>(attribute, f);
+                }
             }
         }
 
@@ -234,17 +459,20 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         {
             if (base.Apply(character))
             {
-                character.Attribute.AttackSpeed = FixedAttackSpeed;
-                character.Attribute.AttackDistance = FixedAttackDistance;
-                if (AttackLimit.ContainsKey((int) WeaponAttributeType.Physical))
+                character.Attribute.WeaponExtraAttackSpeed = FixedAttackSpeed -
+                                                             DataConstraint.CharacterDefaultAttackSpeed;
+                character.Attribute.WeaponExtraAttackDistance = FixedAttackDistance -
+                                                                DataConstraint.CharacterDefaultAttackDistance;
+               
+                if (AttackLimit.ContainsKey(WeaponAttackType.Physical))
                 {
-                    character.Attribute.AttackPhysical[1] += AttackLimit[(int) WeaponAttributeType.Physical].Key;
-                    character.Attribute.AttackPhysical[2] += AttackLimit[(int) WeaponAttributeType.Physical].Value;
+                    character.Attribute.AttackPhysicalMin += AttackLimit[WeaponAttackType.Physical].Key;
+                    character.Attribute.AttackPhysicalMax += AttackLimit[WeaponAttackType.Physical].Value;
                 }
-                if (AttackLimit.ContainsKey((int) WeaponAttributeType.Magic))
+                if (AttackLimit.ContainsKey(WeaponAttackType.Magic))
                 {
-                    character.Attribute.AttackMagic[1] += AttackLimit[(int) WeaponAttributeType.Magic].Key;
-                    character.Attribute.AttackMagic[2] += AttackLimit[(int) WeaponAttributeType.Magic].Value;
+                    character.Attribute.AttackMagicMin += AttackLimit[WeaponAttackType.Magic].Key;
+                    character.Attribute.AttackMagicMax += AttackLimit[WeaponAttackType.Magic].Value;
                 }
                 foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
                 {
@@ -253,7 +481,11 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                         UpdateCharacterAttribute(character, attribute.Value, true);
                     }
                 }
-                CalculateCharacterAttributes(character);
+                foreach (KeyValuePair<AttributeCode, float> attribute in ElementAttributes.Value)
+                {
+                    UpdateCharacterAttribute(character, attribute, true);
+                }
+                character.Attribute.CalculateAttributes();
                 return true;
             }
             return false;
@@ -263,26 +495,30 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
         {
             if (base.Cancel(character))
             {
-                character.Attribute.AttackSpeed = DataConstraint.CharacterDefaultAttackSpeed;
-                character.Attribute.AttackDistance = DataConstraint.CharacterDefaultAttackDistance;
-                if (AttackLimit.ContainsKey((int) WeaponAttributeType.Physical))
+                character.Attribute.WeaponExtraAttackSpeed = 0;
+                character.Attribute.WeaponExtraAttackDistance = 0;
+                if (AttackLimit.ContainsKey(WeaponAttackType.Physical))
                 {
-                    character.Attribute.AttackPhysical[1] -= AttackLimit[(int) WeaponAttributeType.Physical].Key;
-                    character.Attribute.AttackPhysical[2] -= AttackLimit[(int) WeaponAttributeType.Physical].Value;
+                    character.Attribute.AttackPhysicalMin -= AttackLimit[WeaponAttackType.Physical].Key;
+                    character.Attribute.AttackPhysicalMax -= AttackLimit[WeaponAttackType.Physical].Value;
                 }
-                if (AttackLimit.ContainsKey((int) WeaponAttributeType.Magic))
+                if (AttackLimit.ContainsKey(WeaponAttackType.Magic))
                 {
-                    character.Attribute.AttackMagic[1] -= AttackLimit[(int) WeaponAttributeType.Magic].Key;
-                    character.Attribute.AttackMagic[2] -= AttackLimit[(int) WeaponAttributeType.Magic].Value;
+                    character.Attribute.AttackMagicMin -= AttackLimit[WeaponAttackType.Magic].Key;
+                    character.Attribute.AttackMagicMax -= AttackLimit[WeaponAttackType.Magic].Value;
                 }
                 foreach (KeyValuePair<int, KeyValuePair<AttributeCode, float>> attribute in ForgingAttributes)
                 {
                     if (attribute.Key > 0)
                     {
-                        UpdateCharacterAttribute(character, attribute.Value, false);
+                        UpdateCharacterAttribute(character, attribute.Value, true);
                     }
                 }
-                CalculateCharacterAttributes(character);
+                foreach (KeyValuePair<AttributeCode, float> attribute in ElementAttributes.Value)
+                {
+                    UpdateCharacterAttribute(character, attribute, false);
+                }
+                character.Attribute.CalculateAttributes();
                 return true;
             }
             return false;

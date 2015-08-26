@@ -23,6 +23,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using SiegeOnlineServer.Protocol.Common.User;
+using static SiegeOnlineServer.Collection.UserCollection.UserReturn.ReturnCodeType;
+using static SiegeOnlineServer.Protocol.Common.User.UserInfo.StatusType;
 
 namespace SiegeOnlineServer.Collection
 {
@@ -54,7 +56,7 @@ namespace SiegeOnlineServer.Collection
         protected Dictionary<string, int> NicknameToUniqueId { get; set; }
 
         // 从编号获得用户信息
-        protected Dictionary<int, UserBase> UniqueIdToUser { get; set; }
+        protected Dictionary<int, UserInfo> UniqueIdToUser { get; set; }
 
         /// <summary>
         /// 类型：方法
@@ -70,7 +72,7 @@ namespace SiegeOnlineServer.Collection
             ConnectedClientsToBroadcast = new List<ServerPeer>();
             GuidToUniqueId = new Dictionary<Guid, int>();
             AccountToUniqueId = new Dictionary<string, int>();
-            UniqueIdToUser = new Dictionary<int, UserBase>();
+            UniqueIdToUser = new Dictionary<int, UserInfo>();
             NicknameToUniqueId = new Dictionary<string, int>();
         }
 
@@ -85,7 +87,7 @@ namespace SiegeOnlineServer.Collection
         public class UserReturn
         {
             // 回传码
-            public byte ReturnCode { get; set; }
+            public ReturnCodeType ReturnCode { get; set; }
 
             // 回传字串
             public StringBuilder DebugMessage { get; set; }
@@ -98,13 +100,15 @@ namespace SiegeOnlineServer.Collection
             /// 编写日期：2015/7/12
             /// </summary>
             [Serializable]
-            public enum ReturnCodeTypes : byte
+            public enum ReturnCodeType : byte
             {
                 Default, // 初始默认值
-                Success, // 登录成功
+                Success, // 操作成功
                 RepeatedLogin, // 重复登录
                 WrongPassword, // 错误密码
                 Unregister, // 账号未注册
+                AccountExist,   // 账号已存在
+                NicknameExist   // 昵称已存在
             }
 
             /// <summary>
@@ -116,20 +120,34 @@ namespace SiegeOnlineServer.Collection
             /// </summary>
             public UserReturn()
             {
-                ReturnCode = (byte) ReturnCodeTypes.Default;
+                ReturnCode = ReturnCodeType.Default;
                 DebugMessage = new StringBuilder();
             }
         }
 
         /// <summary>
         /// 类型：方法
-        /// 名称：AddConnectedPeer
+        /// 名称：RegistUser
         /// 作者：taixihuase
-        /// 作用：添加一个新的客户端连接
-        /// 编写日期：2015/7/12
+        /// 作用：注册一个新的用户
+        /// 编写日期：2015/8/26
         /// </summary>
-        /// <param name="guid"></param>
-        /// <param name="peer"></param>
+        /// <param name="info"></param>
+        /// <returns></returns>
+        public UserReturn RegistUser(RegistInfo info)
+        {
+            return Server.Data.UserData.RegistNewUser(info);
+        }
+        
+         /// <summary>
+         /// 类型：方法
+         /// 名称：AddConnectedPeer
+         /// 作者：taixihuase
+         /// 作用：添加一个新的客户端连接
+         /// 编写日期：2015/7/12
+         /// </summary>
+         /// <param name="guid"></param>
+         /// <param name="peer"></param>
         public void AddConnectedPeer(Guid guid, ServerPeer peer)
         {
             ConnectedClients.Add(guid, peer);
@@ -183,14 +201,14 @@ namespace SiegeOnlineServer.Collection
         /// <param name="user"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public UserReturn UserOnline(ref UserBase user, string password)
+        public UserReturn UserOnline(UserInfo user, string password)
         {
             // 从数据库获取用户信息
-            UserReturn userReturn = Server.Data.UserData.GetUserInfoFromDatabase(ref user, password);
+            UserReturn userReturn = Server.Data.UserData.GetUserInfo(user, password);
 
             #region 判断用户登录信息是否正确，正确则尝试登录，错误则直接返回
 
-            if (userReturn.ReturnCode == (byte) UserReturn.ReturnCodeTypes.Default)
+            if (userReturn.ReturnCode == UserReturn.ReturnCodeType.Default)
             {
                 lock (this)
                 {
@@ -198,7 +216,7 @@ namespace SiegeOnlineServer.Collection
                     if (GuidToUniqueId.ContainsKey(user.Guid) || AccountToUniqueId.ContainsKey(user.Account) ||
                         UniqueIdToUser.ContainsKey(user.UniqueId))
                     {
-                        userReturn.ReturnCode = (byte) UserReturn.ReturnCodeTypes.RepeatedLogin;
+                        userReturn.ReturnCode = RepeatedLogin;
                         userReturn.DebugMessage.Append("重复登录!");
                     }
                     else
@@ -208,7 +226,7 @@ namespace SiegeOnlineServer.Collection
                         GuidToUniqueId.Add(user.Guid, user.UniqueId);
 
                         user.LoginTime = DateTime.Now;
-                        user.Status = (byte) UserBase.StatusTypes.Loginning;
+                        user.Status = Loginning;
 
                         UniqueIdToUser.Add(user.UniqueId, user);
                         if (!AccountToUniqueId.ContainsKey(user.Account))
@@ -220,7 +238,7 @@ namespace SiegeOnlineServer.Collection
                             NicknameToUniqueId.Add(user.Nickname, user.UniqueId);
                         }
 
-                        userReturn.ReturnCode = (byte) UserReturn.ReturnCodeTypes.Success;
+                        userReturn.ReturnCode = Success;
                         userReturn.DebugMessage.Append("登录成功!");
                     }
                 }
@@ -250,7 +268,7 @@ namespace SiegeOnlineServer.Collection
 
                     if (UniqueIdToUser.ContainsKey(uniqueId))
                     {
-                        UserBase user = GetUser(uniqueId);
+                        UserInfo user = GetUser(uniqueId);
 
                         if (AccountToUniqueId.ContainsKey(user.Account))
                         {
@@ -277,9 +295,9 @@ namespace SiegeOnlineServer.Collection
         /// </summary>
         /// <param name="uniqueId"></param>
         /// <returns></returns>
-        public UserBase GetUser(int uniqueId)
+        public UserInfo GetUser(int uniqueId)
         {
-            UserBase user;
+            UserInfo user;
             UniqueIdToUser.TryGetValue(uniqueId, out user);
             return user;
         }
@@ -293,7 +311,7 @@ namespace SiegeOnlineServer.Collection
         /// </summary>
         /// <param name="account"></param>
         /// <returns></returns>
-        public UserBase GetUserFromAccount(string account)
+        public UserInfo GetUserFromAccount(string account)
         {
             if (AccountToUniqueId.ContainsKey(account))
             {
@@ -311,7 +329,7 @@ namespace SiegeOnlineServer.Collection
         /// </summary>
         /// <param name="nickname"></param>
         /// <returns></returns>
-        public UserBase GetUserFromNickname(string nickname)
+        public UserInfo GetUserFromNickname(string nickname)
         {
             int id;
             if ((id = GetUniqueIdFromNickname(nickname)) >= 0)

@@ -32,6 +32,7 @@ namespace SiegeOnlineServer.Protocol
     {
         Connect,
         Disconnect,
+        Regist,
         Login,
         Logout,
         CreateCharacter,

@@ -34,7 +34,7 @@ using SiegeOnlineServer.Protocol.Common.User;
 // ReSharper disable CheckNamespace
 // ReSharper disable UnusedMember.Local
 
-namespace SiegeOnline.ClientLogic.Scene.LoginScene
+namespace SiegeOnline.ClientLogic.Scene.UserScene
 {
     /// <summary>
     /// 类型：类
@@ -193,7 +193,7 @@ namespace SiegeOnline.ClientLogic.Scene.LoginScene
                 DontDestroyOnLoad(transform.parent);
                 Application.LoadLevel("Character");
 
-                UserBase user = (UserBase)
+                UserInfo user = (UserInfo)
                     Serialization.Deserialize(e.OperationResponse.Parameters[(byte)ParameterCode.Login]);
                 Debug.Log(user.Nickname + " have no character...");
 
@@ -238,7 +238,7 @@ namespace SiegeOnline.ClientLogic.Scene.LoginScene
         /// <param name="sender"></param>
         /// <param name="user"></param>
         /// <returns></returns>
-        private IEnumerator CreateCharacter(object sender, UserBase user)
+        private IEnumerator CreateCharacter(object sender, UserInfo user)
         {
             CreateCharacter create;
             while ((create = FindObjectOfType<CreateCharacter>()) == null)

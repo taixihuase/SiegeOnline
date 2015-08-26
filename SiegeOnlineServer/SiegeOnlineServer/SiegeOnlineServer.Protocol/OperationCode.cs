@@ -34,6 +34,7 @@ namespace SiegeOnlineServer.Protocol
 
         Connect, // 连接
         Disconnect, // 断线
+        Regist, // 注册账号
         Login, // 登录账号
         Logout, // 登出账号
         CreateCharacter, // 创建角色

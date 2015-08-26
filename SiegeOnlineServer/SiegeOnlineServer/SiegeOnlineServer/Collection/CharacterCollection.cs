@@ -23,20 +23,21 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using SiegeOnlineServer.Protocol.Common.Character;
+using SiegeOnlineServer.Protocol.Common.User;
 
 namespace SiegeOnlineServer.Collection
 {
     /// <summary>
     /// 类型：类
-    /// 名称：PlayerCollection
+    /// 名称：CharacterCollection
     /// 作者：taixihuase
     /// 作用：保存当前正在进行的游戏角色信息
     /// 编写日期：2015/7/22
     /// </summary>
-    public class PlayerCollection
+    public class CharacterCollection
     {
         // 正在进行游戏的客户端列表
-        public List<ServerPeer> GamingClients { get; set; }
+        public List<ServerPeer> GamingClientsToBroadcast { get; set; }
 
         // 从编号获得角色初始信息
         protected Dictionary<int, Character> UniqueIdToCharacterOriginal { get; set; }
@@ -54,9 +55,9 @@ namespace SiegeOnlineServer.Collection
         /// 作用：构造 CharacterCollection 对象
         /// 编写日期：2015/7/22
         /// </summary>
-        public PlayerCollection(ServerApplication server)
+        public CharacterCollection(ServerApplication server)
         {
-            GamingClients = new List<ServerPeer>();
+            GamingClientsToBroadcast = new List<ServerPeer>();
             UniqueIdToCharacterOriginal = new Dictionary<int, Character>();
             UniqueIdToCharacterCopy = new Dictionary<int, Character>();
             Server = server;
@@ -73,7 +74,7 @@ namespace SiegeOnlineServer.Collection
         public class CharacterReturn
         {
             // 回传码
-            public byte ReturnCode { get; set; }
+            public ReturnCodeType ReturnCode { get; set; }
 
             // 回传字串
             public StringBuilder DebugMessage { get; set; }
@@ -86,7 +87,7 @@ namespace SiegeOnlineServer.Collection
             /// 编写日期：2015/8/1
             /// </summary>
             [Serializable]
-            public enum ReturnCodeTypes : byte
+            public enum ReturnCodeType : byte
             {
                 Default = 0, // 初始默认值
                 Success = 1, // 获取资料成功
@@ -102,7 +103,7 @@ namespace SiegeOnlineServer.Collection
             /// </summary>
             public CharacterReturn()
             {
-                ReturnCode = (byte) ReturnCodeTypes.Default;
+                ReturnCode = ReturnCodeType.Default;
                 DebugMessage = new StringBuilder();
             }
         }
@@ -117,7 +118,7 @@ namespace SiegeOnlineServer.Collection
         /// <param name="peer"></param>
         public void AddGamingCharacter(ServerPeer peer)
         {
-            GamingClients.Add(peer);
+            GamingClientsToBroadcast.Add(peer);
         }
 
         /// <summary>
@@ -133,7 +134,7 @@ namespace SiegeOnlineServer.Collection
             ServerPeer peer = Server.Users.TryGetPeer(guid);
             if (peer != null)
             {
-                if (GamingClients.Remove(peer))
+                if (GamingClientsToBroadcast.Remove(peer))
                 {
                     int id = Server.Users.GetUniqueIdFromGuid(guid);
                     if (id >= 0)
@@ -153,11 +154,24 @@ namespace SiegeOnlineServer.Collection
         /// </summary>
         /// <param name="character"></param>
         /// <returns></returns>
-        public CharacterReturn SearchCharacter(ref Character character)
+        public CharacterReturn SearchCharacter(Character character)
         {
-            CharacterReturn characterReturn = Server.Data.CharacterData.GetCharacterInfoFromDatabase(ref character);
+            CharacterReturn characterReturn = Server.Data.CharacterData.GetCharacter(character);
 
             return characterReturn;
+        }
+
+        public bool CharacterLoad(Character character)
+        {
+            lock (this)
+            {
+                if (!UniqueIdToCharacterOriginal.ContainsKey(character.UniqueId))
+                {
+                    UniqueIdToCharacterOriginal.Add(character.UniqueId, character);
+                    return true;
+                }
+                return false;
+            }
         }
 
         /// <summary>
@@ -167,19 +181,26 @@ namespace SiegeOnlineServer.Collection
         /// 作用：添加一个角色连接
         /// 编写日期：2015/7/22
         /// </summary>
-        /// <param name="character"></param>
+        /// <param name="uniqueId"></param>
+        /// <param name="copy"></param>
         /// <returns></returns>
-        public Character CharacterEnter(Character character)
+        public bool CharacterEnter(int uniqueId, out Character copy)
         {
             lock (this)
             {
-                character.WorldEnterTime = DateTime.Now;
-                UniqueIdToCharacterOriginal.Add(character.UniqueId, character);
-                Character characterCopy = new Character(character);
-                characterCopy.ApplyEquipments();
-                UniqueIdToCharacterCopy.Add(characterCopy.UniqueId, characterCopy);
-                AddGamingCharacter(Server.Users.TryGetPeer(character.Guid));
-                return characterCopy;
+                Character original;
+                if (GetCharacterOriginal(uniqueId, out original))
+                {
+                    original.WorldEnterTime = DateTime.Now;
+                    original.Status = UserInfo.StatusType.Gaming;
+                    copy = new Character(original);
+                    copy.ApplyEquipments();
+                    UniqueIdToCharacterCopy.Add(copy.UniqueId, copy);
+                    AddGamingCharacter(Server.Users.TryGetPeer(copy.Guid));
+                    return true;
+                }
+                copy = null;
+                return false;
             }
         }
 
@@ -190,12 +211,12 @@ namespace SiegeOnlineServer.Collection
         /// 作用：登出一个角色并移除连接
         /// 编写日期：2015/7/23
         /// </summary>
-        /// <param name="character"></param>
-        public void CharacterExit(Character character)
+        /// <param name="guid"></param>
+        public void CharacterExit(Guid guid)
         {
             lock (this)
             {
-                RemoveCharacter(character.Guid);
+                RemoveCharacter(guid);
             }
         }
 
@@ -207,12 +228,11 @@ namespace SiegeOnlineServer.Collection
         /// 编写日期：2015/7/22
         /// </summary>
         /// <param name="uniqueId"></param>
+        /// <param name="character"></param>
         /// <returns></returns>
-        public Character GetCharacterOriginal(int uniqueId)
+        public bool GetCharacterOriginal(int uniqueId, out Character character)
         {
-            Character character;
-            UniqueIdToCharacterOriginal.TryGetValue(uniqueId, out character);
-            return character;
+            return UniqueIdToCharacterOriginal.TryGetValue(uniqueId, out character);
         }
 
         /// <summary>
@@ -223,12 +243,11 @@ namespace SiegeOnlineServer.Collection
         /// 编写日期：2015/8/20
         /// </summary>
         /// <param name="uniqueId"></param>
+        /// <param name="character"></param>
         /// <returns></returns>
-        public Character GetCharacterCopy(int uniqueId)
+        public bool GetCharacterCopy(int uniqueId, out Character character)
         {
-            Character character;
-            UniqueIdToCharacterCopy.TryGetValue(uniqueId, out character);
-            return character;
+            return UniqueIdToCharacterCopy.TryGetValue(uniqueId, out character);
         }
 
         /// <summary>
@@ -239,16 +258,17 @@ namespace SiegeOnlineServer.Collection
         /// 编写日期：2015/7/22
         /// </summary>
         /// <param name="nickName"></param>
+        /// <param name="character"></param>
         /// <returns></returns>
-        public Character GetCharacterOriginalFromNickname(string nickName)
+        public bool GetCharacterOriginalFromNickname(string nickName, out Character character)
         {
             int id = Server.Users.GetUniqueIdFromNickname(nickName);
             if (id >= 0 && UniqueIdToCharacterOriginal.ContainsKey(id))
             {
-                return GetCharacterOriginal(id);
+                return GetCharacterOriginal(id, out character);
             }
-
-            return null;
+            character = null;
+            return false;
         }
 
         /// <summary>
@@ -259,16 +279,17 @@ namespace SiegeOnlineServer.Collection
         /// 编写日期：2015/8/20
         /// </summary>
         /// <param name="nickName"></param>
+        /// <param name="character"></param>
         /// <returns></returns>
-        public Character GetCharacterCopyFromNickname(string nickName)
+        public bool GetCharacterCopyFromNickname(string nickName, out Character character)
         {
             int id = Server.Users.GetUniqueIdFromNickname(nickName);
             if (id >= 0 && UniqueIdToCharacterCopy.ContainsKey(id))
             {
-                return GetCharacterCopy(id);
+                return GetCharacterCopy(id, out character);
             }
-
-            return null;
+            character = null;
+            return false;
         }
     }
 }

@@ -2,13 +2,13 @@
 // Copyright (C) 2015-2016 SiegeOnline
 // 版权所有
 //
-// 文件名：Skill.cs
+// 文件名：Buffer.cs
 //
 // 文件功能描述：
 //
-// 技能属性
+// Buffer属性
 //
-// 创建标识：taixihuase 20150722
+// 创建标识：taixihuase 20150826
 //
 // 修改标识：
 // 修改描述：
@@ -21,29 +21,29 @@
 
 using System;
 
-namespace SiegeOnlineServer.Protocol.Common.Item
+namespace SiegeOnlineServer.Protocol.Common.Skill
 {
     /// <summary>
     /// 类型：类
-    /// 名称：Skill
+    /// 名称：Buffer
     /// 作者：taixihuase
-    /// 作用：角色技能类
-    /// 编写日期：2015/7/22
+    /// 作用：角色Buffer类
+    /// 编写日期：2015/8/26
     /// </summary>
     [Serializable]
-    public class Skill
+    public class Buffer
     {
         public string Name { get; protected set; }
 
         public int FixedId { get; protected set; }
 
-        public Skill(int fixedId, string name)
+        public Buffer(int fixedId, string name)
         {
             FixedId = fixedId;
             Name = name;
         }
 
-        public Skill()
+        public Buffer()
         {
             FixedId = 0;
             Name = "";

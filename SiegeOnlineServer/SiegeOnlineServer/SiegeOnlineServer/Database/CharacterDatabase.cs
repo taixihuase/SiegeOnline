@@ -24,6 +24,7 @@ using SiegeOnlineServer.Protocol.Common;
 using SiegeOnlineServer.Protocol.Common.Character;
 using SiegeOnlineServer.Protocol.Common.Item.Equipment;
 using SiegeOnlineServer.Protocol.Common.User;
+using static SiegeOnlineServer.Collection.CharacterCollection.CharacterReturn.ReturnCodeType;
 
 namespace SiegeOnlineServer.Database
 {
@@ -38,16 +39,16 @@ namespace SiegeOnlineServer.Database
     {
         /// <summary>
         /// 类型：方法
-        /// 名称：GetCharacterInfoFromDatabase
+        /// 名称：GetCharacter
         /// 作者：taixihuase
         /// 作用：尝试从数据库获取玩家游戏角色信息
         /// 编写日期：2015/7/24
         /// </summary>
         /// <param name="character"></param>
         /// <returns></returns>
-        public PlayerCollection.CharacterReturn GetCharacterInfoFromDatabase(ref Character character)
+        public CharacterCollection.CharacterReturn GetCharacter(Character character)
         {
-            PlayerCollection.CharacterReturn characterReturn = new PlayerCollection.CharacterReturn();
+            CharacterCollection.CharacterReturn characterReturn = new CharacterCollection.CharacterReturn();
 
             if (character.Nickname == "abcd" || character.Nickname == "efgh")
             {
@@ -71,38 +72,47 @@ namespace SiegeOnlineServer.Database
                 character.Occupation.BaseManaRecovery = 1;
                 character.Occupation.Apply(character.Attribute);
 
-                Weapon w = new Weapon(1, 2, "刀", OccupationCode.Warrior | OccupationCode.Paladin, 1, 1,
-                    DataConstraint.EquipmentMaxDurability, Weapon.WeaponType.Null, Weapon.WeaponAttributeType.Physical);
+                Weapon w = new Weapon(1, 2, "刀", OccupationCode.Warrior | OccupationCode.Paladin, 1, true, 1,
+                    DataConstraint.EquipmentMaxDurability, 0, 200, 200, Weapon.WeaponType.Null,
+                    Weapon.WeaponAttackType.Physical,
+                    Weapon.WeaponElementType.Null);
+
                 character.Weapons.Add(1, w);
                 w.UpdateAttackLimit(100, 200, null, null);
-                w.AddFixedAttribute(AttributeCode.Attack_Physical, 100);
-                w.AddFixedAttribute(AttributeCode.Attack_Percent_Both, 10);
+                w.UpdateFixedAttribute(AttributeCode.Attack_Physical, 100);
+                w.UpdateFixedAttribute(AttributeCode.Attack_Percent_Both, 10);
                 w.Upgrade();
                 w.Upgrade();
                 w.Upgrade(AttributeCode.Attack_Percent_Both, 90);
+                w.UpdateElementAttribute(Weapon.WeaponElementType.Lightning);
+                w.UpgradeElementAttribute(0);
+                w.UpgradeElementEnhanceAttribute(300);
+                w.UpgradeElementExtraAttribute(10, 2);
 
-                Armor a = new Armor(10, 20, "头盔", OccupationCode.Warrior, 1, 1, DataConstraint.EquipmentMaxDurability,
-                    Armor.ArmorType.Helmet);
+                Armor a = new Armor(10, 20, "头盔", OccupationCode.Warrior, 1, true, 1,
+                    DataConstraint.EquipmentMaxDurability, Armor.ArmorType.Helmet);
+
                 character.Armors.Add(1, a);
                 a.UpdateDefensePoints(1000, 2000);
-                a.AddFixedAttribute(AttributeCode.Life_Increase, 1000);
+                a.UpdateFixedAttribute(AttributeCode.Life_Increase, 1000);
                 a.Upgrade();
                 a.Upgrade(AttributeCode.Life_Increase_Percent, 50);
 
-                Jewel j = new Jewel(100, 200, "戒指", OccupationCode.Common, 1, 1, DataConstraint.EquipmentMaxDurability,
-                    Jewel.JewelType.Ring, Jewel.JewelAttributeType.Null);
-                character.Jewels.Add(1, j);
-                j.AddFixedAttribute(AttributeCode.Resistance_All, 22222);
+                Jewel j = new Jewel(100, 200, "戒指", OccupationCode.Common, 1, false, 1,
+                    DataConstraint.EquipmentMaxDurability, Jewel.JewelType.Ring, Jewel.JewelAttributeType.Null);
 
+                character.Jewels.Add(1, j);
+                j.UpdateFixedAttribute(AttributeCode.Resistance_All, 22222);
+                j.UpdateRandomAttribute(AttributeCode.Attr_Strength, 1234);
 
                 #endregion
 
-                characterReturn.ReturnCode = (byte) PlayerCollection.CharacterReturn.ReturnCodeTypes.Success;
+                characterReturn.ReturnCode = Success;
                 characterReturn.DebugMessage.Append("成功获取角色数据");
             }
             else
             {
-                characterReturn.ReturnCode = (byte) PlayerCollection.CharacterReturn.ReturnCodeTypes.CharacterNotFound;
+                characterReturn.ReturnCode = CharacterNotFound;
                 characterReturn.DebugMessage.Append("当前账号尚未创建角色");
             }
 
@@ -111,15 +121,15 @@ namespace SiegeOnlineServer.Database
 
         /// <summary>
         /// 类型：方法
-        /// 名称：GetCharacterPositionFromDatabase
+        /// 名称：GetCharacterPosition
         /// 作者：taixihuase
         /// 作用：获取玩家游戏上次离线时的位置信息
         /// 编写日期：2015/7/24
         /// </summary>
         /// <param name="character"></param>
-        public void GetCharacterPositionFromDatabase(ref Character character)
+        public void GetCharacterPosition(Character character)
         {
-            if (character.Status == (byte) UserBase.StatusTypes.Gaming)
+            if (character.Status == UserInfo.StatusType.Gaming)
             {
                 character.Position.SetPosition(10, 20, 30);
             }
@@ -127,24 +137,17 @@ namespace SiegeOnlineServer.Database
 
         /// <summary>
         /// 类型：方法
-        /// 名称：CreateCharacterDependOnDatabase
+        /// 名称：CreateNewCharacter
         /// 作者：taixihuase
         /// 作用：根据数据库资料为玩家创建一个新的角色
         /// 编写日期：2015/7/24
         /// </summary>
         /// <param name="character"></param>
-        /// <param name="info"></param>
-        public void CreateCharacterDependOnDatabase(out Character character, CreateInfo info)
+        public void CreateNewCharacter(Character character)
         {
-            UserBase temp = new UserBase(info.Guid, info.Account, info.UniqueId, info.Nickname, info.Status)
+            switch (character.Occupation.Type)
             {
-                LoginTime = info.LoginTime
-            };
-            character = new Character(temp);
-
-            switch (info.Occupation)
-            {
-                case (byte) CreateInfo.OccupationTypes.Warrior:
+                case OccupationCode.Warrior:
                 {
                     character.Position.SetPosition(10, 20, 30);
                     int[] exp = new int[DataConstraint.CharacterMaxLevel];
@@ -168,20 +171,20 @@ namespace SiegeOnlineServer.Database
                 }
             }
 
-            SaveCharacterToDatabase(character);
+            SaveCharacter(character);
         }
 
         /// <summary>
         /// 类型：方法
-        /// 名称：SaveCharacterToDatabase
+        /// 名称：SaveCharacter
         /// 作者：taixihuase
         /// 作用：向数据库提交一个玩家的角色数据
         /// 编写日期：2015/7/24
         /// </summary>
         /// <param name="character"></param>
-        public void SaveCharacterToDatabase(Character character)
+        public void SaveCharacter(Character character)
         {
-            
+
         }
     }
 }

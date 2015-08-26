@@ -22,6 +22,7 @@
 using System;
 using ExitGames.Client.Photon;
 using SiegeOnlineServer.Protocol;
+using SiegeOnlineServer.Protocol.Common;
 using SiegeOnlineServer.Protocol.Common.Character;
 // ReSharper disable CheckNamespace
 
@@ -37,7 +38,7 @@ namespace SiegeOnlineClient.ClientLogic.Event
     public class WorldEnterEventArgs : EventArgs
     {
         // 自身角色进入场景所需的数据
-        public Character MyCharacter { get; private set; }
+        public Position MyCharacterPosition { get; private set; }
 
         // 任意角色进入场景所需的数据
         public Character AnyCharacter { get; private set; }
@@ -52,9 +53,9 @@ namespace SiegeOnlineClient.ClientLogic.Event
         /// <param name="response"></param>
         public WorldEnterEventArgs(OperationResponse response)
         {
-            Character character = (Character)
+            Position position = (Position)
                 Serialization.Deserialize(response.Parameters[(byte) ParameterCode.WorldEnter]);
-            MyCharacter = character;
+            MyCharacterPosition = position;
             AnyCharacter = null;
         }
 
@@ -71,7 +72,7 @@ namespace SiegeOnlineClient.ClientLogic.Event
             Character character = (Character)
                 Serialization.Deserialize(eventData.Parameters[(byte) ParameterCode.WorldEnter]);
             AnyCharacter = character;
-            MyCharacter = null;
+            MyCharacterPosition = null;
         }
     }
 }

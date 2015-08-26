@@ -144,6 +144,7 @@ namespace SiegeOnlineServer.Protocol.Common
         // 特殊
         Feedback,                       // 魔法反馈
         Immunity,                       // 负面免疫
+        Penetration,                    // 护甲穿透
         Rebound,                        // 伤害反弹
     }
 }

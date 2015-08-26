@@ -79,6 +79,11 @@ namespace SiegeOnlineServer
         {
             switch (operationRequest.OperationCode)
             {
+                // 账号注册
+                case (byte)OperationCode.Regist:
+                    Regist.OnRequest(operationRequest, sendParameters, this);
+                    break;
+
                 // 账号登陆
                 case (byte) OperationCode.Login:
                     Login.OnRequest(operationRequest, sendParameters, this);
@@ -109,7 +114,7 @@ namespace SiegeOnlineServer
         /// <param name="reasonDetail"></param>
         protected override void OnDisconnect(DisconnectReason reasonCode, string reasonDetail)
         {
-            Server.Players.RemoveCharacter(PeerGuid);
+            Server.Characters.RemoveCharacter(PeerGuid);
             Server.Users.UserOffline(PeerGuid);
             Server.Users.RemovePeer(PeerGuid);
         }

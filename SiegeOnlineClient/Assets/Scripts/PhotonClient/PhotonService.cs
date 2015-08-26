@@ -20,7 +20,8 @@
 //----------------------------------------------------------------------------------------------------------
 
 using ExitGames.Client.Photon;
-using SiegeOnline.ClientLogic.Scene.LoginScene;
+using SiegeOnline.ClientLogic.Scene.CharacterScene;
+using SiegeOnline.ClientLogic.Scene.UserScene;
 using SiegeOnline.ClientLogic.Scene.WorldScene;
 using SiegeOnlineServer.Protocol;
 using SiegeOnlineClient.ClientLogic;
@@ -118,6 +119,11 @@ namespace SiegeOnlineClient.PhotonClient
                 // 账号登陆
                 case (byte) OperationCode.Login:
                     Object.FindObjectOfType<Login>().OnResponse(operationResponse, this);
+                    break;
+
+                // 角色创建
+                case (byte)OperationCode.CreateCharacter:
+                    Object.FindObjectOfType<CreateCharacter>().OnResponse(operationResponse, this);
                     break;
 
                 // 玩家进入场景

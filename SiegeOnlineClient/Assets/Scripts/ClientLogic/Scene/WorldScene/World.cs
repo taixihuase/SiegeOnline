@@ -26,6 +26,7 @@ using SiegeOnlineClient.PhotonClient;
 using SiegeOnlineServer.Protocol;
 using UnityEngine;
 using UnityEngine.UI;
+
 // ReSharper disable UnusedMember.Local
 // ReSharper disable CheckNamespace
 
@@ -126,7 +127,7 @@ namespace SiegeOnline.ClientLogic.Scene.WorldScene
         /// <param name="e"></param>
         private void MyWorldPlayerEnter(object sender, WorldEnterEventArgs e)
         {
-            Debug.Log(e.MyCharacter.WorldEnterTime);
+            PhotonService.Player.CharacterCopy.Position = e.MyCharacterPosition;
         }
 
         /// <summary>
@@ -140,7 +141,22 @@ namespace SiegeOnline.ClientLogic.Scene.WorldScene
         /// <param name="e"></param>
         private void AnyPlayerEnter(object sender, WorldEnterEventArgs e)
         {
+            #region 测试用例
+
             LoginTip.text = "玩家 " + e.AnyCharacter.Nickname + " 上线了！";
+            Debug.Log(e.AnyCharacter.Armors[1].DefensePoints[1]);
+            foreach (var fixedAttribute in e.AnyCharacter.Weapons[1].FixedAttributes)
+            {
+                Debug.Log(fixedAttribute.Value);
+            }
+            Debug.Log(e.AnyCharacter.Weapons[1].ForgingAttributes[4].Value);
+            Debug.Log(e.AnyCharacter.Position.Z);
+            Debug.Log(e.AnyCharacter.Attribute.EnhanceLightning);
+            Debug.Log(e.AnyCharacter.Attribute.ResistanceLightning);
+            Debug.Log(e.AnyCharacter.Experience.Level);
+            Debug.Log(e.AnyCharacter.Experience.GainedExperience);
+
+            #endregion
         }
 
         #endregion
