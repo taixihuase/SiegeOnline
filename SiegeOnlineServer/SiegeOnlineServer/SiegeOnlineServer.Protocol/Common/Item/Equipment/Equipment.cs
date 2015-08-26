@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using SiegeOnlineServer.Protocol.Common.Character;
 
@@ -534,12 +533,6 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                         {
                             float newv = (float) pi.GetValue(character.Attribute, null);
                             newv += f*sign;
-                            StreamWriter sw = File.AppendText(@"I:\Users\Administrator\Desktop\1.txt");
-                                sw.WriteLine(character.Attribute.SpeedAttack);
-                                sw.WriteLine(character.Attribute.AttackSpeed);
-                                sw.WriteLine("______");
-                                sw.Close();
-
                             if (newv <= 0)
                             {
                                 newv = 0;

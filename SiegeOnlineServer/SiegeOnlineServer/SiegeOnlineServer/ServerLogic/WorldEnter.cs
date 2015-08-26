@@ -64,20 +64,23 @@ namespace SiegeOnlineServer.ServerLogic
         {
             ServerPeer.Log.Debug("Entering");
 
-            Character characterBase = (Character)
+            int uniqueId = (int)
                 Serialization.Deserialize(operationRequest.Parameters[(byte) ParameterCode.WorldEnter]);
 
-            Character character = peer.Server.Players.CharacterEnter(characterBase);
-            peer.Server.Data.CharacterData.GetCharacterPositionFromDatabase(ref character);
+            Character character;
+            if (peer.Server.Characters.CharacterEnter(uniqueId, out character))
+            {
+                peer.Server.Data.CharacterData.GetCharacterPosition(character);
+            }
 
             // 返回数据给客户端
 
-            byte[] data = Serialization.Serialize(character);
+            byte[] pos = Serialization.Serialize(character.Position);
 
             OperationResponse reponseData = new OperationResponse((byte) OperationCode.WorldEnter,
                 new Dictionary<byte, object>
                 {
-                    {(byte) ParameterCode.WorldEnter, data}
+                    {(byte) ParameterCode.WorldEnter, pos}
                 })
             {
                 ReturnCode = (short) ErrorCode.Ok,
@@ -85,11 +88,12 @@ namespace SiegeOnlineServer.ServerLogic
             };
             peer.SendOperationResponse(reponseData, sendParameters);
 
+            byte[] data = Serialization.Serialize(character);
             EventData eventData = new EventData((byte) EventCode.WorldEnter, new Dictionary<byte, object>
             {
                 {(byte) ParameterCode.WorldEnter, data}
             });
-            eventData.SendTo(peer.Server.Players.GamingClients, sendParameters);
+            eventData.SendTo(peer.Server.Characters.GamingClientsToBroadcast, sendParameters);
         }
     }
 }

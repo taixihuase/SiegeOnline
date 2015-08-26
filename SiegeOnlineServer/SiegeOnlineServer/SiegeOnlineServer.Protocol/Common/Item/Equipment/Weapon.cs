@@ -397,10 +397,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
                 {
                     string extra = Enum.GetName(typeof(ElementExtraAttribute), num);
                     AttributeCode attr = (AttributeCode)Enum.Parse(typeof(AttributeCode), extra);
-                    ElementAttributes.Value[attr] = ElementAttributes.Value[attr] + value;
-                    StreamWriter sw =  new StreamWriter(@"I:\Users\Administrator\Desktop\1.txt", true);
-                    sw.Write(ElementAttributes.Value[attr].ToString(CultureInfo.InvariantCulture));
-                    sw.Close();
+                    ElementAttributes.Value[attr] = ElementAttributes.Value[attr] + value;     
                 }
             }
         }

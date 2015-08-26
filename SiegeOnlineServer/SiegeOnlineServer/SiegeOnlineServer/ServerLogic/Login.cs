@@ -26,6 +26,8 @@ using SiegeOnlineServer.Collection;
 using SiegeOnlineServer.Protocol;
 using SiegeOnlineServer.Protocol.Common.Character;
 using SiegeOnlineServer.Protocol.Common.User;
+using static SiegeOnlineServer.Collection.CharacterCollection.CharacterReturn.ReturnCodeType;
+using static SiegeOnlineServer.Collection.UserCollection.UserReturn.ReturnCodeType;
 
 namespace SiegeOnlineServer.ServerLogic
 {
@@ -77,11 +79,11 @@ namespace SiegeOnlineServer.ServerLogic
             ServerPeer.Log.Debug(login.Password);
 
             // 获取用户资料
-            UserBase user = new UserBase(peer.PeerGuid, login.Account);
-            UserCollection.UserReturn userReturn = peer.Server.Users.UserOnline(ref user, login.Password);
+            UserInfo user = new UserInfo(peer.PeerGuid, login.Account);
+            UserCollection.UserReturn userReturn = peer.Server.Users.UserOnline(user, login.Password);
 
             // 若成功取得用户资料
-            if (userReturn.ReturnCode == (byte) UserCollection.UserReturn.ReturnCodeTypes.Success)
+            if (userReturn.ReturnCode == UserCollection.UserReturn.ReturnCodeType.Success)
             {
                 ServerPeer.Log.Debug(user.LoginTime + " :User " + user.Nickname + " loginning...");
 
@@ -97,21 +99,20 @@ namespace SiegeOnlineServer.ServerLogic
                 #region 获取角色资料
 
                 Character character = new Character(user);
-                PlayerCollection.CharacterReturn characterReturn =
-                    peer.Server.Players.SearchCharacter(ref character);
+                CharacterCollection.CharacterReturn characterReturn =
+                    peer.Server.Characters.SearchCharacter(character);
 
                 // 若取得角色资料
-                if (characterReturn.ReturnCode == (byte) PlayerCollection.CharacterReturn.ReturnCodeTypes.Success)
+                if (characterReturn.ReturnCode == CharacterCollection.CharacterReturn.ReturnCodeType.Success)
                 {
                     byte[] playerBytes = Serialization.Serialize(character);
                     parameter.Add((byte) ParameterCode.Login, playerBytes);
                     returnCode = (short) ErrorCode.Ok;
                     message = "";
 
-                    ServerPeer.Log.Debug(character.Occupation.Name);
+                    peer.Server.Characters.CharacterLoad(character);
                 }
-                else if (characterReturn.ReturnCode ==
-                         (byte) PlayerCollection.CharacterReturn.ReturnCodeTypes.CharacterNotFound)
+                else if (characterReturn.ReturnCode == CharacterNotFound)
                 {
                     byte[] userBytes = Serialization.Serialize(user);
                     parameter.Add((byte) ParameterCode.Login, userBytes);
@@ -130,7 +131,7 @@ namespace SiegeOnlineServer.ServerLogic
                 ServerPeer.Log.Debug(user.LoginTime + " : User " + user.Account + " logins successfully");
             }
             // 若重复登录
-            else if (userReturn.ReturnCode == (byte) UserCollection.UserReturn.ReturnCodeTypes.RepeatedLogin)
+            else if (userReturn.ReturnCode == RepeatedLogin)
             {
                 OperationResponse response = new OperationResponse((byte) OperationCode.Login)
                 {
@@ -139,7 +140,7 @@ namespace SiegeOnlineServer.ServerLogic
                 };
                 peer.SendOperationResponse(response, sendParameters);
                 ServerPeer.Log.Debug(DateTime.Now + " : Failed to login " + user.Account + " Because of " +
-                                     Enum.GetName(typeof (UserCollection.UserReturn.ReturnCodeTypes),
+                                     Enum.GetName(typeof (UserCollection.UserReturn.ReturnCodeType),
                                          userReturn.ReturnCode));
             }
             else
@@ -152,7 +153,7 @@ namespace SiegeOnlineServer.ServerLogic
                 };
                 peer.SendOperationResponse(response, sendParameters);
                 ServerPeer.Log.Debug(DateTime.Now + " : Failed to login " + user.Account + " Because of " +
-                                     Enum.GetName(typeof (UserCollection.UserReturn.ReturnCodeTypes),
+                                     Enum.GetName(typeof (UserCollection.UserReturn.ReturnCodeType),
                                          userReturn.ReturnCode));
             }
 

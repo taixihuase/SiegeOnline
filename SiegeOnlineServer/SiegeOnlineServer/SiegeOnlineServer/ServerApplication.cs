@@ -46,7 +46,7 @@ namespace SiegeOnlineServer
 
         public UserCollection Users;
 
-        public PlayerCollection Players;
+        public CharacterCollection Characters;
 
         /// <summary>
         /// 类型：方法
@@ -91,7 +91,7 @@ namespace SiegeOnlineServer
             Users = new UserCollection(this);
 
             // 初始化玩家角色列表
-            Players = new PlayerCollection(this);
+            Characters = new CharacterCollection(this);
         }
 
         /// <summary>

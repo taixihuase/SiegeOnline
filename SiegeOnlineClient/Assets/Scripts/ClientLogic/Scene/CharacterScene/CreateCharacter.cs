@@ -19,13 +19,13 @@
 //
 //----------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using ExitGames.Client.Photon;
 using SiegeOnlineClient.ClientLogic;
 using SiegeOnlineClient.ClientLogic.Event;
 using SiegeOnlineClient.PhotonClient;
 using SiegeOnlineServer.Protocol;
 using SiegeOnlineServer.Protocol.Common.Character;
-using SiegeOnlineServer.Protocol.Common.User;
 using UnityEngine;
 using UnityEngine.UI;
 // ReSharper disable CheckNamespace
@@ -93,9 +93,7 @@ namespace SiegeOnline.ClientLogic.Scene.CharacterScene
         /// <param name="e"></param>
         private void CreateCharacterData(object sender, CreateCharacterEventArgs e)
         {
-            PhotonService.Player.User = new UserBase(e.User.Guid, e.User.Account, e.User.UniqueId, e.User.Nickname,
-                e.User.Status);
-            Debug.Log(e.User.Nickname);
+            PhotonService.Player.SetCharacterOriginal(new Character(e.User));
         }
 
         #endregion
@@ -111,7 +109,12 @@ namespace SiegeOnline.ClientLogic.Scene.CharacterScene
         /// </summary>
         public void OnCreateCharacterButtonDown()
         {
-            
+            byte[] data = Serialization.Serialize(PhotonService.Player.CharacterOriginal);
+            var parameter = new Dictionary<byte, object>
+            {
+                {(byte) ParameterCode.CreateCharacter, data}
+            };
+            PhotonSingleton.Service.Peer.OpCustom((byte)OperationCode.CreateCharacter, parameter, true);
         }
 
         #endregion

@@ -21,6 +21,7 @@
 
 using SiegeOnlineServer.Collection;
 using SiegeOnlineServer.Protocol.Common.User;
+using static SiegeOnlineServer.Collection.UserCollection.UserReturn.ReturnCodeType;
 
 namespace SiegeOnlineServer.Database
 {
@@ -35,7 +36,7 @@ namespace SiegeOnlineServer.Database
     {
         /// <summary>
         /// 类型：方法
-        /// 名称：GetUserInfoFromDatabase
+        /// 名称：GetUserInfo
         /// 作者：taixihuase
         /// 作用：尝试从数据库获取获取用户信息
         /// 编写日期：2015/7/24
@@ -43,7 +44,7 @@ namespace SiegeOnlineServer.Database
         /// <param name="user"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public UserCollection.UserReturn GetUserInfoFromDatabase(ref UserBase user, string password)
+        public UserCollection.UserReturn GetUserInfo(UserInfo user, string password)
         {
             UserCollection.UserReturn userReturn = new UserCollection.UserReturn();
 
@@ -67,22 +68,53 @@ namespace SiegeOnlineServer.Database
                         user.Nickname = "test";
                     }
 
-                    userReturn.ReturnCode = (byte) UserCollection.UserReturn.ReturnCodeTypes.Default;
+                    userReturn.ReturnCode = Default;
                     userReturn.DebugMessage.Append("用户信息正确!");
                 }
                 else
                 {
-                    userReturn.ReturnCode = (byte) UserCollection.UserReturn.ReturnCodeTypes.WrongPassword;
+                    userReturn.ReturnCode = WrongPassword;
                     userReturn.DebugMessage.Append("密码错误!");
                 }
             }
             else
             {
-                userReturn.ReturnCode = (byte) UserCollection.UserReturn.ReturnCodeTypes.Unregister;
+                userReturn.ReturnCode = Unregister;
                 userReturn.DebugMessage.Append("该账号未注册!");
             }
 
             return userReturn;
+        }
+
+        public UserCollection.UserReturn RegistNewUser(RegistInfo info)
+        {
+            UserCollection.UserReturn userReturn = new UserCollection.UserReturn();
+
+            if (info.Account != "siege" && info.Account != "online" && info.Account != "test")
+            {
+                if (info.Nickname != "abcd" && info.Nickname != "efgh" && info.Nickname != "test")
+                {
+                    userReturn.ReturnCode = Default;
+                    userReturn.DebugMessage.Append("注册账号成功");
+                }
+                else
+                {
+                    userReturn.ReturnCode = NicknameExist;
+                    userReturn.DebugMessage.Append("昵称已被使用");
+                }
+            }
+            else
+            {
+                userReturn.ReturnCode = AccountExist;
+                userReturn.DebugMessage.Append("账号名已存在");
+            }
+
+            return userReturn;
+        }
+
+        public void SaveUser(UserInfo user)
+        {
+            
         }
     }
 }

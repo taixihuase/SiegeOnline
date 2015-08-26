@@ -35,7 +35,7 @@ namespace SiegeOnlineClient.ClientLogic.Event
     public class CreateCharacterEventArgs : EventArgs
     {
         // 创建角色时所需的数据
-        public UserBase User { get; private set; }
+        public UserInfo User { get; private set; }
 
         /// <summary>
         /// 类型：方法
@@ -45,7 +45,7 @@ namespace SiegeOnlineClient.ClientLogic.Event
         /// 编写日期：2015/7/26
         /// </summary>
         /// <param name="user"></param>
-        public CreateCharacterEventArgs(UserBase user)
+        public CreateCharacterEventArgs(UserInfo user)
         {
             User = user;
         }

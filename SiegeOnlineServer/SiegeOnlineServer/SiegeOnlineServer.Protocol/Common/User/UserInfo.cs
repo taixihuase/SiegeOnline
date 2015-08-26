@@ -2,7 +2,7 @@
 // Copyright (C) 2015-2016 SiegeOnline
 // 版权所有
 //
-// 文件名：UserBase.cs
+// 文件名：UserInfo.cs
 //
 // 文件功能描述：
 //
@@ -25,13 +25,13 @@ namespace SiegeOnlineServer.Protocol.Common.User
 {
     /// <summary>
     /// 类型：类
-    /// 名称：UserBase
+    /// 名称：UserInfo
     /// 作者：taixihuase
     /// 作用：用户信息
     /// 编写日期：2015/7/12
     /// </summary>
     [Serializable]
-    public class UserBase
+    public class UserInfo
     {
         // 索引
         public Guid Guid { get; set; }
@@ -46,12 +46,11 @@ namespace SiegeOnlineServer.Protocol.Common.User
         public string Nickname { get; set; }
 
         // 状态
-        public byte Status { get; set; }
+        public StatusType Status { get; set; }
 
         // 状态枚举值
         [Serializable]
-        [Flags]
-        public enum StatusTypes : byte
+        public enum StatusType : byte
         {
             Default             =   0,          // 默认值
             Loginning           =   1,          // 上线中
@@ -63,9 +62,9 @@ namespace SiegeOnlineServer.Protocol.Common.User
 
         /// <summary>
         /// 类型：方法
-        /// 名称：UserBase
+        /// 名称：UserInfo
         /// 作者：taixihuase
-        /// 作用：通过参数值构造 UserBase 对象
+        /// 作用：通过参数值构造 UserInfo 对象
         /// 编写日期：2015/7/12
         /// </summary>
         /// <param name="guid"></param>
@@ -73,7 +72,7 @@ namespace SiegeOnlineServer.Protocol.Common.User
         /// <param name="account"></param>
         /// <param name="nickname"></param>
         /// <param name="status"></param>
-        public UserBase(Guid guid, string account, int uniqueId = -1, string nickname = "", byte status = 0)
+        public UserInfo(Guid guid, string account, int uniqueId = -1, string nickname = "", StatusType status = StatusType.Default)
         {
             Guid = guid;
             UniqueId = uniqueId;
@@ -84,13 +83,13 @@ namespace SiegeOnlineServer.Protocol.Common.User
 
         /// <summary>
         /// 类型：方法
-        /// 名称：UserBase
+        /// 名称：UserInfo
         /// 作者：taixihuase
-        /// 作用：通过现有的 UserBase 对象构造新的 UserBase 对象
+        /// 作用：通过现有的 UserInfo 对象构造新的 UserInfo 对象
         /// 编写日期：2015/7/12
         /// </summary>
         /// <param name="user"></param>
-        public UserBase(UserBase user)
+        public UserInfo(UserInfo user)
         {
             Guid = user.Guid;
             UniqueId = user.UniqueId;

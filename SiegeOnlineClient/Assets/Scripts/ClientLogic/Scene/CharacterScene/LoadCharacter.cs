@@ -19,16 +19,14 @@
 //
 //----------------------------------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using SiegeOnlineClient.ClientLogic.Event;
+using SiegeOnlineClient.Data.Player;
 using SiegeOnlineClient.PhotonClient;
 using SiegeOnlineServer.Protocol;
-using SiegeOnlineServer.Protocol.Common.User;
 using UnityEngine;
 using UnityEngine.UI;
+
 // ReSharper disable CheckNamespace
 // ReSharper disable UnusedMember.Local
 
@@ -86,21 +84,10 @@ namespace SiegeOnline.ClientLogic.Scene.CharacterScene
         /// <param name="e"></param>
         private void LoadCharacterData(object sender, LoadCharacterEventArgs e)
         {
-            PhotonService.Player.User = new UserBase(e.Character.Guid, e.Character.Account, e.Character.UniqueId,
-                e.Character.Nickname, e.Character.Status);
-            PhotonService.Player.Character = e.Character;
+            var player = PhotonService.Player;
 
-            Debug.Log(e.Character.Attribute.AttackSpeed);
-
-            e.Character.Weapons[1].Apply(e.Character);
-            Debug.Log(e.Character.Attribute.AttackSpeed);
-
-            e.Character.Armors[1].Apply(e.Character);
-            Debug.Log(e.Character.Attribute.AttackSpeed);
-            e.Character.Jewels[1].Apply(e.Character);
-            Debug.Log(e.Character.Attribute.AttackSpeed);
-
-
+            player.SetCharacter(e.Character, e.Character);
+            player.CharacterCopy.ApplyEquipments();
         }
 
         #endregion
@@ -116,7 +103,7 @@ namespace SiegeOnline.ClientLogic.Scene.CharacterScene
         /// </summary>
         public void OnEnterGameButtonDown()
         {
-            byte[] data = Serialization.Serialize(PhotonService.Player.Character);
+            byte[] data = Serialization.Serialize(PhotonService.Player.User.UniqueId);
             var parameter = new Dictionary<byte, object>
             {
                 {(byte) ParameterCode.WorldEnter, data}
