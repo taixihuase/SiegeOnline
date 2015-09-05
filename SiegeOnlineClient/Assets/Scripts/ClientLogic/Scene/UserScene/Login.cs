@@ -48,6 +48,9 @@ namespace SiegeOnline.ClientLogic.Scene.UserScene
         // 登录参数
         private LoginInfo _loginInfo;
 
+        // 登录父对象
+        public GameObject LoginObj;
+
         // 账号输入框
         public InputField Account;
 
@@ -60,9 +63,29 @@ namespace SiegeOnline.ClientLogic.Scene.UserScene
         // 退出按钮
         public Button ExitButton;
 
+        // 注册按钮
+        public Button RegistButton;
+
+        // 找回按钮
+        public Button RetrievebButton;
+
+        // 记住开关
+        public Toggle RememberToggle;
+
         // Use this for initialization
         private void Start()
         {
+            LoginObj.SetActive(true);
+            if (PlayerPrefs.HasKey("Account"))
+            {
+                Account.text = PlayerPrefs.GetString("Account");
+                RememberToggle.isOn = true;
+            }
+            else
+            {
+                RememberToggle.isOn = false;
+            }
+
             // 注册方法
             PhotonService.Events.MyLogin += CharacterNotExist;
             PhotonService.Events.MyLogin += ErrorInput;
@@ -80,12 +103,12 @@ namespace SiegeOnline.ClientLogic.Scene.UserScene
 
         /// <summary>
         /// 类型：方法
-        /// 名称：OnLoginButtonDown
+        /// 名称：OnLoginButtonClick
         /// 作者：taixihuase
         /// 作用：当按下登录按钮时触发登录事件，将登录信息发送给服务端
         /// 编写日期：2015/7/17
         /// </summary>
-        public void OnLoginButtonDown()
+        public void OnLoginButtonClick()
         {
             if (PhotonSingleton.Service.ServerConnected)
             {
@@ -99,24 +122,75 @@ namespace SiegeOnline.ClientLogic.Scene.UserScene
                         {(byte) ParameterCode.Login, data}
                     };
 
-                    PhotonSingleton.Service.Peer.OpCustom((byte)OperationCode.Login, parameter, true);
+                    PhotonSingleton.Service.Peer.OpCustom((byte) OperationCode.Login, parameter, true);
                 }
             }
         }
 
         /// <summary>
         /// 类型：方法
-        /// 名称：OnExitButtonDown
+        /// 名称：OnExitButtonClick
         /// 作者：taixihuase
         /// 作用：当按下退出按钮时触发退出事件，退出进程，Debug模式无效
         /// 编写日期：2015/7/17
         /// </summary>
-        public void OnExitButtonDown()
+        public void OnExitButtonClick()
         {
             Application.Quit();
         }
 
-        #endregion
+        /// <summary>
+        /// 类型：方法
+        /// 名称：OnRememberToggleClick
+        /// 作者：taixihuase
+        /// 作用：当按下记住账号开关时触发自动补全或关闭补全事件
+        /// 编写日期：2015/9/3
+        /// </summary>
+        public void OnRememberToggleClick()
+        {
+            if (RememberToggle.isOn)
+            {
+                if (Account.text.Length > 0)
+                {
+                    PlayerPrefs.SetString("Account", Account.text);
+                }
+            }
+            else
+            {
+                if (PlayerPrefs.HasKey("Account"))
+                {
+                    PlayerPrefs.DeleteKey("Account");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：OnRegistButtonClick
+        /// 作者：taixihuase
+        /// 作用：当按下注册账号按钮时触发快速注册事件
+        /// 编写日期：2015/9/3
+        /// </summary>
+        public void OnRegistButtonClick()
+        {
+            FindObjectOfType<Regist>().RegistObj.SetActive(true);
+            Password.text = "";
+            LoginObj.SetActive(false);
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：OnRetrieveButtonClick
+        /// 作者：taixihuase
+        /// 作用：当按下找回密码按钮时触发找回密码事件
+        /// 编写日期：2015/9/3
+        /// </summary>
+        public void OnRetrieveButtonClick()
+        {
+            
+        }
+
+    #endregion
 
         #region 用于注册事件的方法
 

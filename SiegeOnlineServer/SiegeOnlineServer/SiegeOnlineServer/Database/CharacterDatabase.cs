@@ -24,7 +24,6 @@ using SiegeOnlineServer.Protocol.Common;
 using SiegeOnlineServer.Protocol.Common.Character;
 using SiegeOnlineServer.Protocol.Common.Item.Equipment;
 using SiegeOnlineServer.Protocol.Common.User;
-using static SiegeOnlineServer.Collection.CharacterCollection.CharacterReturn.ReturnCodeType;
 
 namespace SiegeOnlineServer.Database
 {
@@ -107,12 +106,12 @@ namespace SiegeOnlineServer.Database
 
                 #endregion
 
-                characterReturn.ReturnCode = Success;
+                characterReturn.ReturnCode = CharacterCollection.CharacterReturn.ReturnCodeType.Success;
                 characterReturn.DebugMessage.Append("成功获取角色数据");
             }
             else
             {
-                characterReturn.ReturnCode = CharacterNotFound;
+                characterReturn.ReturnCode = CharacterCollection.CharacterReturn.ReturnCodeType.CharacterNotFound;
                 characterReturn.DebugMessage.Append("当前账号尚未创建角色");
             }
 

@@ -94,7 +94,7 @@ namespace SiegeOnlineServer.Database
             {
                 if (info.Nickname != "abcd" && info.Nickname != "efgh" && info.Nickname != "test")
                 {
-                    userReturn.ReturnCode = Default;
+                    userReturn.ReturnCode = Success;
                     userReturn.DebugMessage.Append("注册账号成功");
                 }
                 else

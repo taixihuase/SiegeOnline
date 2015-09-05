@@ -72,24 +72,44 @@ namespace SiegeOnlineServer.ServerLogic
 
             if (userReturn.ReturnCode == UserCollection.UserReturn.ReturnCodeType.Success)
             {
-                OperationResponse response = new OperationResponse((byte)OperationCode.Regist)
+                Smtp email = new Smtp("taixihuase@hotmail.com", "SiegeOnline")
                 {
-                    ReturnCode = (short)ErrorCode.Ok,
-                    DebugMessage = "账号创建成功！"
+                    Subject = "《攻城 Online》账号注册成功！",
+                    Body = "欢迎来到《攻城 Online》，您的登录账号为" + info.Account +
+                           "，登录密码为" + info.Password +
+                           "，您的游戏昵称为" + info.Nickname +
+                           "。祝您游戏愉快！"
                 };
-
-                peer.SendOperationResponse(response, sendParameters);
+                email.To(info.Account);
+                if (email.SendMailUseHotmail("taixihuase@hotmail.com", "DORA21120903"))
+                {
+                    OperationResponse response = new OperationResponse((byte) OperationCode.Regist)
+                    {
+                        ReturnCode = (short) ErrorCode.Ok,
+                        DebugMessage = "账号创建成功！"
+                    };
+                    peer.SendOperationResponse(response, sendParameters);
+                }
+                else
+                {
+                    OperationResponse response = new OperationResponse((byte)OperationCode.Regist)
+                    {
+                        ReturnCode = (short)ErrorCode.CustomError,
+                        DebugMessage = "账号创建失败！请检查注册邮箱是否存在。"
+                    };
+                    peer.SendOperationResponse(response, sendParameters);
+                }
             }
             else
             {
-                OperationResponse response = new OperationResponse((byte)OperationCode.Regist)
+                OperationResponse response = new OperationResponse((byte) OperationCode.Regist)
                 {
-                    ReturnCode = (short)ErrorCode.InvalidOperation,
+                    ReturnCode = (short) ErrorCode.InvalidOperation,
                     DebugMessage = userReturn.DebugMessage.ToString()
                 };
                 peer.SendOperationResponse(response, sendParameters);
                 ServerPeer.Log.Debug(DateTime.Now + " : Failed to regist " + info.Account + " Because of " +
-                                     Enum.GetName(typeof(UserCollection.UserReturn.ReturnCodeType),
+                                     Enum.GetName(typeof (UserCollection.UserReturn.ReturnCodeType),
                                          userReturn.ReturnCode));
             }
         }

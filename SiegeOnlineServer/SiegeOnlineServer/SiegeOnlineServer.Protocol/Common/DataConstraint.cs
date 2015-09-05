@@ -33,7 +33,7 @@ namespace SiegeOnlineServer.Protocol.Common
     [Serializable]
     public static class DataConstraint
     {
-        public static int CharacterMaxLevel = 100;
+        public static int CharacterMaxLevel => 100;
 
         public static int EquipmentMaxLevel => 10;
 
