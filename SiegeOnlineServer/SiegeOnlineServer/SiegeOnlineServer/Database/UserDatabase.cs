@@ -86,6 +86,15 @@ namespace SiegeOnlineServer.Database
             return userReturn;
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：RegistNewUser
+        /// 作者：taixihuase
+        /// 作用：对客户端填写的注册信息进行判断并返回结果
+        /// 编写日期：2015/8/27
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns></returns>
         public UserCollection.UserReturn RegistNewUser(RegistInfo info)
         {
             UserCollection.UserReturn userReturn = new UserCollection.UserReturn();
@@ -106,12 +115,20 @@ namespace SiegeOnlineServer.Database
             else
             {
                 userReturn.ReturnCode = AccountExist;
-                userReturn.DebugMessage.Append("账号名已存在");
+                userReturn.DebugMessage.Append("邮箱已被注册");
             }
 
             return userReturn;
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：SaveUser
+        /// 作者：taixihuase
+        /// 作用：往数据库中保存一条用户账号信息
+        /// 编写日期：2015/8/27
+        /// </summary>
+        /// <param name="user"></param>
         public void SaveUser(UserInfo user)
         {
             

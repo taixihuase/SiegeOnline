@@ -20,7 +20,6 @@
 //-----------------------------------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using SiegeOnlineServer.Protocol.Common.Item.Equipment;
 using SiegeOnlineServer.Protocol.Common.Skill;
 using SiegeOnlineServer.Protocol.Common.User;

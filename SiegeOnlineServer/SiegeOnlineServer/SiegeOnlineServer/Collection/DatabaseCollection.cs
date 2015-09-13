@@ -35,10 +35,20 @@ namespace SiegeOnlineServer.Collection
         // 服务端
         public readonly ServerApplication Server;
 
+        // 用户数据库对象
         public UserDatabase UserData { get; protected set; }
 
+        // 角色数据库对象
         public CharacterDatabase CharacterData { get; protected set; }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：DatabaseCollection
+        /// 作者：taixihuase
+        /// 作用：构造 DatabaseCollection 对象
+        /// 编写日期：2015/8/1
+        /// </summary>
+        /// <param name="server"></param>
         public DatabaseCollection(ServerApplication server)
         {
             Server = server;

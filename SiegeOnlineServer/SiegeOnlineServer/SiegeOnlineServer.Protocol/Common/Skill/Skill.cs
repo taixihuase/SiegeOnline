@@ -37,12 +37,28 @@ namespace SiegeOnlineServer.Protocol.Common.Skill
 
         public int FixedId { get; protected set; }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Skill
+        /// 作者：taixihuase
+        /// 作用：通过数据库中获得的数据构造技能对象实例
+        /// 编写日期：2015/8/27
+        /// </summary>
+        /// <param name="fixedId"></param>
+        /// <param name="name"></param>
         public Skill(int fixedId, string name)
         {
             FixedId = fixedId;
             Name = name;
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Skill
+        /// 作者：taixihuase
+        /// 作用：构造空的技能实例
+        /// 编写日期：2015/8/27
+        /// </summary>
         public Skill()
         {
             FixedId = 0;

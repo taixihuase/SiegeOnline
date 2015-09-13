@@ -34,6 +34,24 @@ namespace SiegeOnlineClient.ClientLogic
     /// </summary>
     public class EventCollection
     {
+        #region 与注册相关的委托及事件
+
+        // 注册委托
+        public delegate void RegistEventHandler(object sender, RegistEventArgs e);
+
+        // 注册事件
+        public event RegistEventHandler MyRegist;
+
+        public void OnRegist(object sender, RegistEventArgs e)
+        {
+            if (MyRegist != null)
+            {
+                MyRegist(sender, e);
+            }
+        }
+
+        #endregion
+
         #region 与登录相关的委托及事件
 
         // 登录委托

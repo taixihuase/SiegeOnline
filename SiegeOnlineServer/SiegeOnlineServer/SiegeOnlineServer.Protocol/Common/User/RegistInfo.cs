@@ -45,6 +45,16 @@ namespace SiegeOnlineServer.Protocol.Common.User
         // 注册时间
         public DateTime RegistTime { get; set; }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：RegistInfo
+        /// 作者：taixihuase
+        /// 作用：通过账号名、昵称和密码构造注册数据
+        /// 编写日期：2015/8/27
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="nickname"></param>
+        /// <param name="password"></param>
         public RegistInfo(string account, string nickname, string password)
         {
             Account = account;

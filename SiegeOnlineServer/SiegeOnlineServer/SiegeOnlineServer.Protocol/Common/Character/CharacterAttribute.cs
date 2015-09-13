@@ -240,7 +240,7 @@ namespace SiegeOnlineServer.Protocol.Common.Character
             Mana = (int) (ManaBase*(100 + ManaIncreasePercent)*0.01);
             AttackSpeed = SpeedAttack + WeaponExtraAttackSpeed + DataConstraint.CharacterDefaultAttackSpeed;
             AttackDistance = WeaponExtraAttackDistance + DataConstraint.CharacterDefaultAttackDistance;
-            SkillCooldownSpeed = DataConstraint.CharacterDefaultSkillCooldownSpeed - SpeedCooldown;
+            SkillCooldownSpeed = DataConstraint.CharacterDefaultSkillCooldownSpeed + SpeedCooldown;
             MovementSpeed = DataConstraint.CharacterDefaultMovementSpeed + SpeedMovement;
             ExperienceGainSpeed = DataConstraint.CharacterDefaultExperienceGainSpeed + SpeedExperience;
         }

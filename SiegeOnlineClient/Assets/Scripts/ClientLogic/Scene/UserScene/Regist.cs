@@ -1,4 +1,28 @@
-﻿using System.Collections.Generic;
+﻿//-----------------------------------------------------------------------------------------------------------
+// Copyright (C) 2015-2016 SiegeOnline
+// 版权所有
+//
+// 文件名：Regist.cs
+//
+// 文件功能描述：
+//
+// 注册账号脚本，处理注册的逻辑及相关 UI
+//
+// 创建标识：taixihuase 20150827
+//
+// 修改标识：
+// 修改描述：
+// 
+//
+// 修改标识：
+// 修改描述：
+//
+//----------------------------------------------------------------------------------------------------------
+
+using System.Collections.Generic;
+using ExitGames.Client.Photon;
+using SiegeOnlineClient.ClientLogic;
+using SiegeOnlineClient.ClientLogic.Event;
 using SiegeOnlineClient.Component;
 using SiegeOnlineClient.PhotonClient;
 using SiegeOnlineServer.Protocol;
@@ -10,7 +34,14 @@ using SiegeOnlineServer.Protocol.Common.User;
 
 namespace SiegeOnline.ClientLogic.Scene.UserScene
 {
-    public class Regist : MonoBehaviour
+    /// <summary>
+    /// 类型：类
+    /// 名称：Regist
+    /// 作者：taixihuase
+    /// 作用：客户端注册类
+    /// 编写日期：2015/8/27
+    /// </summary>
+    public class Regist : MonoBehaviour, IResponseReceive
     {
         // 注册父对象
         public GameObject RegistObj;
@@ -54,6 +85,17 @@ namespace SiegeOnline.ClientLogic.Scene.UserScene
         {
             RegistObj.SetActive(false);
             _nicknameSbcLength = 0;
+
+            // 注册方法
+            PhotonService.Events.MyRegist += Success;
+            PhotonService.Events.MyRegist += EmailNotExist;
+            PhotonService.Events.MyRegist += RepeatedRegist;
+        }
+
+        public void OnResponse(OperationResponse operationResponse, PhotonService service)
+        {
+            RegistEventArgs e = new RegistEventArgs(operationResponse);
+            PhotonService.Events.OnRegist(service, e);
         }
 
         #region UI 方法
@@ -82,6 +124,13 @@ namespace SiegeOnline.ClientLogic.Scene.UserScene
             }
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：OnCancelButtonClick
+        /// 作者：taixihuase
+        /// 作用：当按下取消按钮时触发取消注册事件，关闭注册界面并返回登录界面
+        /// 编写日期：2015/9/5
+        /// </summary>
         public void OnCancelButtonClick()
         {
             FindObjectOfType<Login>().LoginObj.SetActive(true);
@@ -93,13 +142,20 @@ namespace SiegeOnline.ClientLogic.Scene.UserScene
             RegistObj.SetActive(false);
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：CheckRegistInfo
+        /// 作者：taixihuase
+        /// 作用：检测注册信息有效性
+        /// 编写日期：2015/9/5
+        /// </summary>
         private bool CheckRegistInfo()
         {
             if (Email.text.Length == 0)
             {
                 RegistTip.text = "注册邮箱不能为空！";
                 return false;
-            }   
+            }
             if (!StringTool.IsEmail(Email.text))
             {
                 RegistTip.text = "注册邮箱格式不正确！";
@@ -159,5 +215,67 @@ namespace SiegeOnline.ClientLogic.Scene.UserScene
         }
 
         #endregion
+
+        #region 用于注册事件的方法
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：Success
+        /// 作者：taixihuase
+        /// 作用：当成功进行注册时触发
+        /// 编写日期：2015/7/29
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Success(object sender, RegistEventArgs e)
+        {
+            if (e.OperationResponse.ReturnCode == (short) ErrorCode.Ok)
+            {
+                Debug.Log(e.OperationResponse.DebugMessage);
+            }
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：EmailNotExist
+        /// 作者：taixihuase
+        /// 作用：当注册邮箱无效时触发
+        /// 编写日期：2015/7/29
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void EmailNotExist(object sender, RegistEventArgs e)
+        {
+            if (e.OperationResponse.ReturnCode == (short) ErrorCode.EmailNotFound)
+            {
+                Debug.Log(e.OperationResponse.DebugMessage);
+            }
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：RepeatedRegist
+        /// 作者：taixihuase
+        /// 作用：当尝试用一个已注册过的邮箱或游戏昵称进行注册时触发
+        /// 编写日期：2015/7/29
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RepeatedRegist(object sender, RegistEventArgs e)
+        {
+            if (e.OperationResponse.ReturnCode == (short) ErrorCode.RepeatedOperation)
+            {
+                Debug.Log(e.OperationResponse.DebugMessage);
+            }
+        }
+
+        #endregion
+
+        private void OnDestroy()
+        {
+            PhotonService.Events.MyRegist -= Success;
+            PhotonService.Events.MyRegist -= EmailNotExist;
+            PhotonService.Events.MyRegist -= RepeatedRegist;
+        }
     }
 }

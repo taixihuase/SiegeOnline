@@ -116,6 +116,11 @@ namespace SiegeOnlineClient.PhotonClient
         {
             switch (operationResponse.OperationCode)
             {
+                // 账号注册
+                case (byte)OperationCode.Regist:
+                    Object.FindObjectOfType<Regist>().OnResponse(operationResponse, this);
+                    break;
+
                 // 账号登陆
                 case (byte) OperationCode.Login:
                     Object.FindObjectOfType<Login>().OnResponse(operationResponse, this);

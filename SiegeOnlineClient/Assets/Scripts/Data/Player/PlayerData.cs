@@ -35,27 +35,63 @@ namespace SiegeOnlineClient.Data.Player
     /// </summary>
     public class PlayerData
     {
+        // 账号信息
         public UserInfo User { get; protected set; }
 
+        // 角色初始数据
         public Character CharacterOriginal { get; protected set; }
 
+        // 角色数据副本
         public Character CharacterCopy { get; set; }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：SetUserInfo
+        /// 作者：taixihuase
+        /// 作用：设置账号信息
+        /// 编写日期：2015/8/27
+        /// </summary>
+        /// <param name="user"></param>
         public void SetUserInfo(UserInfo user)
         {
             User = user;
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：SetCharacterOriginal
+        /// 作者：taixihuase
+        /// 作用：设置角色初始数据
+        /// 编写日期：2015/8/27
+        /// </summary>
+        /// <param name="original"></param>
         public void SetCharacterOriginal(Character original)
         {
             CharacterOriginal = new Character(original);
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：SetCharacterCopy
+        /// 作者：taixihuase
+        /// 作用：设置角色数据副本
+        /// 编写日期：2015/8/27
+        /// </summary>
+        /// <param name="copy"></param>
         public void SetCharacterCopy(Character copy)
         {
             CharacterCopy = new Character(copy);
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：SetCharacter
+        /// 作者：taixihuase
+        /// 作用：设置角色数据
+        /// 编写日期：2015/8/27
+        /// </summary>
+        /// <param name="original"></param>
+        /// <param name="copy"></param>
         public void SetCharacter(Character original, Character copy)
         {
             SetUserInfo(new UserInfo(original.Guid, original.Account, original.UniqueId, original.Nickname, original.Status));

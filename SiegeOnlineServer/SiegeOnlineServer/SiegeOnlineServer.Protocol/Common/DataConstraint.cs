@@ -33,24 +33,34 @@ namespace SiegeOnlineServer.Protocol.Common
     [Serializable]
     public static class DataConstraint
     {
+        // 角色最大等级
         public static int CharacterMaxLevel => 100;
 
+        // 装备最大锻造等级
         public static int EquipmentMaxLevel => 10;
 
+        // 装备最大耐久度
         public static int EquipmentMaxDurability => 1000;
 
+        // 角色默认攻击速度
         public static float CharacterDefaultAttackSpeed => 100;
 
+        // 角色默认攻击距离
         public static float CharacterDefaultAttackDistance => 1;
 
+        // 角色默认移动速度
         public static float CharacterDefaultMovementSpeed => 100;
 
-        public static float CharacterDefaultSkillCooldownSpeed => 100;
+        // 角色默认技能冷却速度
+        public static float CharacterDefaultSkillCooldownSpeed => 0;
 
+        // 角色默认经验获得倍率
         public static float CharacterDefaultExperienceGainSpeed => 100;
 
+        // 元素属性最大种类数
         public static int ElementMaxSize => 7;
 
+        // 武器元素属性最大能量值
         public static int WeaponMaxElementEnergy => 1000;
     }
 }

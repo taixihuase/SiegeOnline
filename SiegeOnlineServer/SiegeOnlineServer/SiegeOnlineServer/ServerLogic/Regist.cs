@@ -92,9 +92,9 @@ namespace SiegeOnlineServer.ServerLogic
                 }
                 else
                 {
-                    OperationResponse response = new OperationResponse((byte)OperationCode.Regist)
+                    OperationResponse response = new OperationResponse((byte) OperationCode.Regist)
                     {
-                        ReturnCode = (short)ErrorCode.CustomError,
+                        ReturnCode = (short) ErrorCode.EmailNotFound,
                         DebugMessage = "账号创建失败！请检查注册邮箱是否存在。"
                     };
                     peer.SendOperationResponse(response, sendParameters);
@@ -104,7 +104,7 @@ namespace SiegeOnlineServer.ServerLogic
             {
                 OperationResponse response = new OperationResponse((byte) OperationCode.Regist)
                 {
-                    ReturnCode = (short) ErrorCode.InvalidOperation,
+                    ReturnCode = (short) ErrorCode.RepeatedOperation,
                     DebugMessage = userReturn.DebugMessage.ToString()
                 };
                 peer.SendOperationResponse(response, sendParameters);

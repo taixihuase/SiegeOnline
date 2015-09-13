@@ -1,13 +1,42 @@
-﻿using System;
+﻿//-----------------------------------------------------------------------------------------------------------
+// Copyright (C) 2015-2016 SiegeOnline
+// 版权所有
+//
+// 文件名：JewelCollection.cs
+//
+// 文件功能描述：
+//
+// 饰品集合
+//
+// 创建标识：taixihuase 20150827
+//
+// 修改标识：
+// 修改描述：
+// 
+//
+// 修改标识：
+// 修改描述：
+//
+//----------------------------------------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 
 namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
 {
+    /// <summary>
+    /// 类型：类
+    /// 名称：JewelCollection
+    /// 作者：taixihuase
+    /// 作用：饰品集合类
+    /// 编写日期：2015/8/27
+    /// </summary>
     [Serializable]
-    public class JewelCollection : IItem
+    public class JewelCollection : ICollection, IItem
     {
         private readonly Dictionary<int, Jewel> _jewels;
 
+        // 索引器
         public Jewel this[int index]
         {
             get
@@ -31,16 +60,25 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             }
         }
 
+        /// <summary>
+        /// 类型：方法
+        /// 名称：JewelCollection
+        /// 作者：taixihuase
+        /// 作用：构造一个 JewelCollection 对象并初始化数据
+        /// 编写日期：2015/8/27
+        /// </summary>
         public JewelCollection()
         {
             _jewels = new Dictionary<int, Jewel> {{-1, new Jewel()}};
         }
 
-        public bool Add(int index, Jewel armor)
+        #region ICollection 接口实现
+
+        public bool Add(int index, object obj)
         {
             if (!_jewels.ContainsKey(index) && index >= 0)
             {
-                _jewels.Add(index, armor);
+                _jewels.Add(index, (Jewel) obj);
                 return true;
             }
             return false;
@@ -62,6 +100,9 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             _jewels.Add(-1, new Jewel());
         }
 
+        #endregion
+
+        #region IItem 接口实现
 
         public bool Apply(Character.Character character)
         {
@@ -96,5 +137,7 @@ namespace SiegeOnlineServer.Protocol.Common.Item.Equipment
             }
             return result;
         }
+
+        #endregion
     }
 }
