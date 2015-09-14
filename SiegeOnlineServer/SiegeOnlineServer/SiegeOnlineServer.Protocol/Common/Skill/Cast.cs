@@ -19,7 +19,7 @@
 //
 //----------------------------------------------------------------------------------------------------------
 
-namespace SiegeOnlineServer.Protocol.Common
+namespace SiegeOnlineServer.Protocol.Common.Skill
 {
     /// <summary>
     /// 类型：类

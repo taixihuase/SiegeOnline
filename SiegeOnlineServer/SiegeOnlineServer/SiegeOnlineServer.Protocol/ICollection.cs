@@ -19,7 +19,7 @@
 //
 //----------------------------------------------------------------------------------------------------------
 
-namespace SiegeOnlineServer.Protocol.Common
+namespace SiegeOnlineServer.Protocol
 {
     /// <summary>
     /// 类型：接口

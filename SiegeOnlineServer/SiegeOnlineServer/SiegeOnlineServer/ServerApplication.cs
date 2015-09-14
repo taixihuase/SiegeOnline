@@ -48,6 +48,8 @@ namespace SiegeOnlineServer
 
         public CharacterCollection Characters;
 
+        public MapCollection Maps;
+
         /// <summary>
         /// 类型：方法
         /// 名称：CreatePeer
@@ -92,6 +94,9 @@ namespace SiegeOnlineServer
 
             // 初始化玩家角色列表
             Characters = new CharacterCollection(this);
+
+            // 初始化地图分区列表
+            Maps = new MapCollection(this);
         }
 
         /// <summary>

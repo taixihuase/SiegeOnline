@@ -33,19 +33,6 @@ namespace SiegeOnlineServer.Protocol.Common
     [Serializable]
     public class Position
     {
-        /// <summary>
-        /// 类型：枚举
-        /// 名称：MapCode
-        /// 作者：taixihuase
-        /// 作用：地图编号
-        /// 编写日期：2015/8/16
-        /// </summary>
-        [Serializable]
-        public enum MapCode : byte
-        {
-            World,
-        }
-
         public byte Map { get; set; } // 地图编号
 
         public float X { get; set; } // X坐标
