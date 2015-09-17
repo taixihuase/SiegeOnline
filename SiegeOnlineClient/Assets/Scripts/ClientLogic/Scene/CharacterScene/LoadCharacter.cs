@@ -21,7 +21,6 @@
 
 using System.Collections.Generic;
 using SiegeOnlineClient.ClientLogic.Event;
-using SiegeOnlineClient.Data.Player;
 using SiegeOnlineClient.PhotonClient;
 using SiegeOnlineServer.Protocol;
 using UnityEngine;

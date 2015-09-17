@@ -78,7 +78,7 @@ namespace SiegeOnlineClient.PhotonClient
         /// 作用：创建单例
         /// 编写日期：2015/7/17
         /// </summary>
-        void Awake()
+        private void Awake()
         {
             // 若当前不存在单例，则创建单例并实例化客户端服务进程
             if (_instance == null)
@@ -98,13 +98,13 @@ namespace SiegeOnlineClient.PhotonClient
         }
 
         // Use this for initialization
-        void Start()
+        private void Start()
         {
             Service.Connect(ServerIp, ServerPort, ConnectionProtocol, ServerName);
         }
 
         // Update is called once per frame
-        void Update()
+        private void Update()
         {
             Service.Service();
             Debug.Log(Service.ServerConnected);
@@ -117,7 +117,7 @@ namespace SiegeOnlineClient.PhotonClient
         /// 作用：退出进程
         /// 编写日期：2015/7/17
         /// </summary>
-        void OnApplicationQuit()
+        private void OnApplicationQuit()
         {
             Service.Disconnect();
         }

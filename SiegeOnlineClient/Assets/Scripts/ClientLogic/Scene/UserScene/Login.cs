@@ -187,10 +187,10 @@ namespace SiegeOnline.ClientLogic.Scene.UserScene
         /// </summary>
         public void OnRetrieveButtonClick()
         {
-            
+
         }
 
-    #endregion
+        #endregion
 
         #region 用于注册事件的方法
 
@@ -262,13 +262,13 @@ namespace SiegeOnline.ClientLogic.Scene.UserScene
         /// <param name="e"></param>
         private void CharacterNotExist(object sender, LoginEventArgs e)
         {
-            if (e.OperationResponse.ReturnCode == (short)ErrorCode.CharacterNotFound)
+            if (e.OperationResponse.ReturnCode == (short) ErrorCode.CharacterNotFound)
             {
                 DontDestroyOnLoad(transform.parent);
                 Application.LoadLevel("Character");
 
                 UserInfo user = (UserInfo)
-                    Serialization.Deserialize(e.OperationResponse.Parameters[(byte)ParameterCode.Login]);
+                    Serialization.Deserialize(e.OperationResponse.Parameters[(byte) ParameterCode.Login]);
                 Debug.Log(user.Nickname + " have no character...");
 
                 StartCoroutine(CreateCharacter(sender, user));

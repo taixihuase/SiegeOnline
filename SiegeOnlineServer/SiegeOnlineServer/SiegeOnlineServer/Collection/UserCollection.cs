@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using SiegeOnlineServer.Protocol.Common.User;
 using static SiegeOnlineServer.Collection.UserCollection.UserReturn.ReturnCodeType;
@@ -373,6 +374,21 @@ namespace SiegeOnlineServer.Collection
                 return GuidToUniqueId[guid];
             }
             return -1;
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：GetGuidFromUniqueId
+        /// 作者：taixihuase
+        /// 作用：通过用户编号获取客户端连接索引，不存在则返回默认值
+        /// 编写日期：2015/9/17
+        /// </summary>
+        /// <param name="uniqueId"></param>
+        /// <returns></returns>
+        public Guid GetGuidFromUniqueId(int uniqueId)
+        {
+            var key = GuidToUniqueId.Where(pair => pair.Value == uniqueId).Select(pair => pair.Key);
+            return key.FirstOrDefault();
         }
     }
 }

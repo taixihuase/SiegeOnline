@@ -40,6 +40,7 @@ namespace SiegeOnlineServer.Protocol
         CreateCharacter, // 创建角色
         WorldEnter, // 进入游戏场景
         WorldExit, // 退出游戏场景
+        ZoneUpdate, // 地图区位转换
 
         #endregion
 

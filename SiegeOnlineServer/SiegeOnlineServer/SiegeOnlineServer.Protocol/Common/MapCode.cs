@@ -34,7 +34,6 @@ namespace SiegeOnlineServer.Protocol.Common
     [Serializable]
     public enum MapCode : byte
     {
-        [Description("20")]
-        World,
+        [Description("20")] World = 1,
     }
 }

@@ -23,7 +23,9 @@ using System;
 using ExitGames.Logging;
 using Photon.SocketServer;
 using PhotonHostRuntimeInterfaces;
+using SiegeOnlineServer.Collection;
 using SiegeOnlineServer.Protocol;
+using SiegeOnlineServer.Protocol.Common.Character;
 using SiegeOnlineServer.ServerLogic;
 
 namespace SiegeOnlineServer
@@ -80,7 +82,7 @@ namespace SiegeOnlineServer
             switch (operationRequest.OperationCode)
             {
                 // 账号注册
-                case (byte)OperationCode.Regist:
+                case (byte) OperationCode.Regist:
                     Regist.OnRequest(operationRequest, sendParameters, this);
                     break;
 
@@ -99,7 +101,10 @@ namespace SiegeOnlineServer
                     WorldEnter.OnRequest(operationRequest, sendParameters, this);
                     break;
 
-
+                // 角色所处区位转换
+                case (byte) OperationCode.ZoneUpdate:
+                    ZoneUpdate.OnRequest(operationRequest, sendParameters, this);
+                    break;
             }
         }
 
@@ -114,6 +119,13 @@ namespace SiegeOnlineServer
         /// <param name="reasonDetail"></param>
         protected override void OnDisconnect(DisconnectReason reasonCode, string reasonDetail)
         {
+            Character character;
+            int uniqueId = Server.Users.GetUniqueIdFromGuid(PeerGuid);
+            if (Server.Characters.GetCharacterCopy(uniqueId, out character))
+            {
+                Server.Maps.Remove(character.Position.Map, character.Position.Zone, uniqueId);
+            }
+
             Server.Characters.RemoveCharacter(PeerGuid);
             Server.Users.UserOffline(PeerGuid);
             Server.Users.RemovePeer(PeerGuid);

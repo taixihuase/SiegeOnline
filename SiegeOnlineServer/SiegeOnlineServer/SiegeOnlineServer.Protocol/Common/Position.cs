@@ -33,7 +33,9 @@ namespace SiegeOnlineServer.Protocol.Common
     [Serializable]
     public class Position
     {
-        public byte Map { get; set; } // 地图编号
+        public MapCode Map { get; set; } // 地图编号
+
+        public int Zone { get; set; } // 区位编号
 
         public float X { get; set; } // X坐标
 
@@ -61,7 +63,7 @@ namespace SiegeOnlineServer.Protocol.Common
             Y = y;
             Z = z;
             Direction = dir;
-            Map = (byte) map;
+            Map = map;
         }
 
         /// <summary>
@@ -74,7 +76,7 @@ namespace SiegeOnlineServer.Protocol.Common
         /// <param name="map"></param>
         public void SetMap(MapCode map)
         {
-            Map = (byte) map;
+            Map = map;
         }
 
         /// <summary>

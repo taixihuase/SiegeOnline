@@ -82,8 +82,7 @@ namespace SiegeOnlineClient.PhotonClient
         /// <param name="port"></param>
         /// <param name="connectionProtocol"></param>
         /// <param name="serverName"></param>
-        public void Connect(string ip, int port, ExitGames.Client.Photon.ConnectionProtocol connectionProtocol,
-            string serverName)
+        public void Connect(string ip, int port, ConnectionProtocol connectionProtocol, string serverName)
         {
             string serverAddress = ip + ":" + port.ToString();
             Peer = new PhotonPeer(this, connectionProtocol);

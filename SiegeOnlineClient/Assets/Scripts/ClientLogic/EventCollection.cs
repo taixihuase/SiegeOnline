@@ -137,6 +137,37 @@ namespace SiegeOnlineClient.ClientLogic
 
         #endregion
 
+        #region 与角色所处地图区位转移相关的委托和事件
+
+        // 更新角色区位信息委托
+        public delegate void ZoneUpdateEventHandler(object sender, ZoneUpdateEventArgs e);
+
+        // 自身角色更新区位信息事件
+        public event ZoneUpdateEventHandler MyZoneUpdate;
+
+        // 其他角色更新区位信息事件
+        public event ZoneUpdateEventHandler OtherZoneUpdate;
+
+        public void OnZoneUpdate(object sender, ZoneUpdateEventArgs e)
+        {
+            if (e.MyUpdate != null)
+            {
+                if (MyZoneUpdate != null)
+                {
+                    MyZoneUpdate(sender, e);
+                }
+            }
+            else if(e.OtherUpdate != null)
+            {
+                if (OtherZoneUpdate != null)
+                {
+                    OtherZoneUpdate(sender, e);
+                }
+            }
+        }
+
+        #endregion
+
         #region 其他
 
         #endregion

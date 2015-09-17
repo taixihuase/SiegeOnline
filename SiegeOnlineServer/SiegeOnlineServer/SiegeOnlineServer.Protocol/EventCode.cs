@@ -38,5 +38,6 @@ namespace SiegeOnlineServer.Protocol
         CreateCharacter,
         WorldEnter,
         WorldExit,
+        ZoneUpdate,
     }
 }

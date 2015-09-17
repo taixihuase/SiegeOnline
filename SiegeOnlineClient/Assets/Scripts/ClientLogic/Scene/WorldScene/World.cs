@@ -32,13 +32,20 @@ using UnityEngine.UI;
 
 namespace SiegeOnline.ClientLogic.Scene.WorldScene
 {
+    /// <summary>
+    /// 类型：类
+    /// 名称：World
+    /// 作者：taixihuase
+    /// 作用：世界场景类
+    /// 编写日期：2015/7/19
+    /// </summary>
     public class World : MonoBehaviour, IEventReceive, IResponseReceive
     {
         // 玩家上线提示文本
         public Text LoginTip;
 
         // Use this for initialization
-        void Start()
+        private void Start()
         {
             PhotonService.Events.MyWorldEnter += MyWorldPlayerEnter;
             PhotonService.Events.AnyWorldEnter += AnyPlayerEnter;
@@ -167,7 +174,7 @@ namespace SiegeOnline.ClientLogic.Scene.WorldScene
 
         #endregion
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             PhotonService.Events.MyWorldEnter -= MyWorldPlayerEnter;
             PhotonService.Events.AnyWorldEnter -= AnyPlayerEnter;

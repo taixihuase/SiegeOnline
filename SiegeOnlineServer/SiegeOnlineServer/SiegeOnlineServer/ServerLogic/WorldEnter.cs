@@ -77,7 +77,7 @@ namespace SiegeOnlineServer.ServerLogic
 
             byte[] pos = Serialization.Serialize(character.Position);
 
-            OperationResponse reponseData = new OperationResponse((byte) OperationCode.WorldEnter,
+            OperationResponse responseData = new OperationResponse((byte) OperationCode.WorldEnter,
                 new Dictionary<byte, object>
                 {
                     {(byte) ParameterCode.WorldEnter, pos}
@@ -86,7 +86,7 @@ namespace SiegeOnlineServer.ServerLogic
                 ReturnCode = (short) ErrorCode.Ok,
                 DebugMessage = "进入场景成功"
             };
-            peer.SendOperationResponse(reponseData, sendParameters);
+            peer.SendOperationResponse(responseData, sendParameters);
 
             byte[] data = Serialization.Serialize(character);
             EventData eventData = new EventData((byte) EventCode.WorldEnter, new Dictionary<byte, object>
