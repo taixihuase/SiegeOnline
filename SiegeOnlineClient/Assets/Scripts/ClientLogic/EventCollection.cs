@@ -168,6 +168,37 @@ namespace SiegeOnlineClient.ClientLogic
 
         #endregion
 
+        #region 与角色移动相关的委托及事件
+
+        // 角色移动委托
+        public delegate void MoveEventHandler(object sender, MoveEventArgs e);
+
+        // 自身角色移动事件
+        public event MoveEventHandler MyMove;
+
+        // 其他角色移动事件
+        public event MoveEventHandler OtherMove;
+
+        public void OnMove(object sender, MoveEventArgs e)
+        {
+            if (e.MyMove != null)
+            {
+                if (MyMove != null)
+                {
+                    MyMove(sender, e);
+                }
+            }
+            else if (e.OtherPosition != null)
+            {
+                if (OtherMove != null)
+                {
+                    OtherMove(sender, e);
+                }
+            }
+        }
+
+        #endregion
+
         #region 其他
 
         #endregion

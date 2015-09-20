@@ -40,7 +40,11 @@ namespace SiegeOnlineServer.Collection
         // 服务端
         public readonly ServerApplication Server;
 
+        // 记录每个区位中存在的角色编号
         public Dictionary<MapCode, Dictionary<int, List<int>>> MapInfo;
+
+        // 记录每个区位中存在的客户端连接
+        public Dictionary<MapCode, Dictionary<int, List<ServerPeer>>> PeerList; 
 
         /// <summary>
         /// 类型：方法
@@ -56,10 +60,13 @@ namespace SiegeOnlineServer.Collection
 
             MapInfo = new Dictionary<MapCode, Dictionary<int, List<int>>>(new EnumComparer<MapCode>());
 
+            PeerList = new Dictionary<MapCode, Dictionary<int, List<ServerPeer>>>(new EnumComparer<MapCode>());
+
             // 地图编号从 1 开始
             for (int i = 1; i <= Enum.GetValues(typeof (MapCode)).Length; i++)
             {
                 MapInfo.Add((MapCode) i, new Dictionary<int, List<int>>());
+                PeerList.Add((MapCode) i, new Dictionary<int, List<ServerPeer>>());
                 string zone = EnumDescription.GetEnumDescription<MapCode>((MapCode) i);
                 if (zone != Empty)
                 {
@@ -67,6 +74,7 @@ namespace SiegeOnlineServer.Collection
                     for (int j = 1; j <= Convert.ToInt32(zone); j++)
                     {
                         MapInfo[(MapCode) i].Add(j, new List<int>());
+                        PeerList[(MapCode) i].Add(j, new List<ServerPeer>());
                     }
                 }
             }
@@ -92,6 +100,7 @@ namespace SiegeOnlineServer.Collection
                     return false;
                 }
                 MapInfo[map][zone].Add(id);
+                PeerList[map][zone].Add(Server.Users.TryGetPeer(Server.Users.GetGuidFromUniqueId(id)));
                 return true;
             }
             return false;
@@ -114,6 +123,7 @@ namespace SiegeOnlineServer.Collection
                 if (MapInfo[map][zone].Contains(id))
                 {
                     MapInfo[map][zone].Remove(id);
+                    PeerList[map][zone].Remove(Server.Users.TryGetPeer(Server.Users.GetGuidFromUniqueId(id)));
                     return true;
                 }
                 return false;
@@ -134,7 +144,7 @@ namespace SiegeOnlineServer.Collection
             if (Add(mapZone.NextMap, mapZone.NextZone, mapZone.UniqueId))
             {
                 if (Remove(mapZone.CurrMap, mapZone.CurrZone, mapZone.UniqueId))
-                {
+                { 
                     return true;
                 }
                 Remove(mapZone.NextMap, mapZone.NextZone, mapZone.UniqueId);

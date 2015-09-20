@@ -19,8 +19,8 @@
 //
 //-----------------------------------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using Photon.SocketServer;
 using SiegeOnlineServer.Protocol;
 using SiegeOnlineServer.Protocol.Common;
@@ -34,7 +34,7 @@ namespace SiegeOnlineServer.ServerLogic
     /// 作用：角色区位信息更新处理逻辑
     /// 编写日期：2015/9/17
     /// </summary>
-    public class ZoneUpdate
+    public static class ZoneUpdate
     {
         /// <summary>
         /// 类型：方法
@@ -74,44 +74,30 @@ namespace SiegeOnlineServer.ServerLogic
                 List<int> update = peer.Server.Maps.MapInfo[zone.NextMap][zone.NextZone];
                 byte[] characters = Serialization.Serialize(update);
                 OperationResponse response = new OperationResponse(
-                    (byte) OperationCode.ZoneUpdate, new Dictionary<byte, object>
-                    {
-                        {(byte) ParameterCode.ZoneUpdate, characters}
-                    })
+                    (byte) OperationCode.ZoneUpdate)
                 {
-                    ReturnCode = (short) ErrorCode.Ok,
+                    Parameters = new Dictionary<byte, object> {{(byte) ParameterCode.ZoneUpdate, characters}},
+                    ReturnCode = (short)ErrorCode.Ok,
                     DebugMessage = "加载角色区位信息成功"
                 };
                 peer.SendOperationResponse(response, sendParameters);
 
                 // 组播该玩家区位信息给其他客户端
                 byte[] data = Serialization.Serialize(zone);
-                EventData eventData = new EventData((byte) EventCode.ZoneUpdate, new Dictionary<byte, object>
+                EventData eventData = new EventData((byte) EventCode.ZoneUpdate)
                 {
-                    {(byte) ParameterCode.ZoneUpdate, data}
-                });
+                    Parameters = new Dictionary<byte, object> {{(byte) ParameterCode.ZoneUpdate, data}}
+                };
 
                 // 组播去除该角色的区位信息
-                foreach (int id in peer.Server.Maps.MapInfo[zone.CurrMap][zone.CurrZone])
-                {
-                    Guid guid = peer.Server.Users.GetGuidFromUniqueId(id);
-                    if (guid != peer.PeerGuid)
-                    {
-                        ServerPeer p = peer.Server.Users.TryGetPeer(guid);
-                        p?.SendEvent(eventData, sendParameters);
-                    }
-                }
+                eventData.SendTo(
+                    peer.Server.Maps.PeerList[zone.CurrMap][zone.CurrZone].Where(p => p.PeerGuid != peer.PeerGuid),
+                    sendParameters);
 
                 // 组播添加该角色的区位信息
-                foreach (int id in peer.Server.Maps.MapInfo[zone.NextMap][zone.NextZone])
-                {
-                    Guid guid = peer.Server.Users.GetGuidFromUniqueId(id);
-                    if (guid != peer.PeerGuid)
-                    {
-                        ServerPeer p = peer.Server.Users.TryGetPeer(guid);
-                        p?.SendEvent(eventData, sendParameters);
-                    }
-                }
+                eventData.SendTo(
+                    peer.Server.Maps.PeerList[zone.NextMap][zone.NextZone].Where(p => p.PeerGuid != peer.PeerGuid),
+                    sendParameters);
             }
             else
             {

@@ -34,7 +34,7 @@ namespace SiegeOnlineServer.ServerLogic
     /// 作用：响应创建角色请求
     /// 编写日期：2015/7/14
     /// </summary>
-    public class Regist
+    public static class Regist
     {
         /// <summary>
         /// 类型：方法

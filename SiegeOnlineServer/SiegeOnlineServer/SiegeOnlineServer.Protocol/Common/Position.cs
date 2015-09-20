@@ -33,6 +33,8 @@ namespace SiegeOnlineServer.Protocol.Common
     [Serializable]
     public class Position
     {
+        public int UniqueId { get; set; } // 角色编号
+
         public MapCode Map { get; set; } // 地图编号
 
         public int Zone { get; set; } // 区位编号
@@ -45,6 +47,8 @@ namespace SiegeOnlineServer.Protocol.Common
 
         public float Direction { get; set; } // 朝向
 
+        public float Speed { get; set; } // 速度
+
         /// <summary>
         /// 类型：方法
         /// 名称：Position
@@ -52,31 +56,39 @@ namespace SiegeOnlineServer.Protocol.Common
         /// 作用：构造一个位置信息类实例
         /// 编写日期：2015/8/16
         /// </summary>
+        /// <param name="id"></param>
+        /// <param name="map"></param>
+        /// <param name="zone"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <param name="z"></param>
         /// <param name="dir"></param>
-        /// <param name="map"></param>
-        public Position(float x = 0, float y = 0, float z = 0, float dir = 0, MapCode map = MapCode.World)
+        /// <param name="speed"></param>
+        public Position(int id = -1, MapCode map = MapCode.World, int zone = 1, float x = 0, float y = 0, float z = 0, float dir = 0, float speed = 0)
         {
+            UniqueId = id;
+            Map = map;
+            Zone = zone;
             X = x;
             Y = y;
             Z = z;
             Direction = dir;
-            Map = map;
+            Speed = speed;
         }
 
         /// <summary>
         /// 类型：方法
         /// 名称：SetMap
         /// 作者：taixihuase
-        /// 作用：设置地图编号
+        /// 作用：设置地图编号及分区
         /// 编写日期：2015/8/16
         /// </summary>
         /// <param name="map"></param>
-        public void SetMap(MapCode map)
+        /// <param name="zone"></param>
+        public void SetMap(MapCode map, int zone)
         {
             Map = map;
+            Zone = zone;
         }
 
         /// <summary>
@@ -111,6 +123,32 @@ namespace SiegeOnlineServer.Protocol.Common
         {
             SetPosition(x, y, z);
             Direction = dir;
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：SetSpeed
+        /// 作者：taixihuase
+        /// 作用：设置移动速度
+        /// 编写日期：2015/9/20
+        /// </summary>
+        /// <param name="speed"></param>
+        public void SetSpeed(float speed)
+        {
+            Speed = speed;
+        }
+
+        /// <summary>
+        /// 类型：方法
+        /// 名称：SetId
+        /// 作者：taixihuase
+        /// 作用：设置角色编号
+        /// 编写日期：2015/9/20
+        /// </summary>
+        /// <param name="id"></param>
+        public void SetId(int id)
+        {
+            UniqueId = id;
         }
     }
 }

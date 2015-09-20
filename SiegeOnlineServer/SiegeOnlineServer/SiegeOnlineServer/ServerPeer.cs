@@ -105,6 +105,20 @@ namespace SiegeOnlineServer
                 case (byte) OperationCode.ZoneUpdate:
                     ZoneUpdate.OnRequest(operationRequest, sendParameters, this);
                     break;
+
+                    #region 动作事件
+
+                // 角色位置变动
+                case (byte) OperationCode.Idle:
+                case (byte) OperationCode.WalkForward:
+                case (byte) OperationCode.WalkBackward:
+                case (byte) OperationCode.Jump:
+                case (byte) OperationCode.JumpForward:
+                case (byte) OperationCode.JumpBackward:
+                    Move.OnRequest(operationRequest, sendParameters, this);
+                    break;
+
+                    #endregion
             }
         }
 

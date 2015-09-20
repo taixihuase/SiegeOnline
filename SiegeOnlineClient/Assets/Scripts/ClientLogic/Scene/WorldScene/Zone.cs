@@ -88,7 +88,7 @@ namespace Assets.Scripts.ClientLogic.Scene.WorldScene
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public void MyCharacterUpdateZone(object sender, ZoneUpdateEventArgs e)
+        private void MyCharacterUpdateZone(object sender, ZoneUpdateEventArgs e)
         {
             UniqueIdInZone = e.MyUpdate;
         }
@@ -102,7 +102,7 @@ namespace Assets.Scripts.ClientLogic.Scene.WorldScene
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public void OtherCharacterUpdateZone(object sender, ZoneUpdateEventArgs e)
+        private void OtherCharacterUpdateZone(object sender, ZoneUpdateEventArgs e)
         {
             MapZone zone = e.OtherUpdate;
             if (Map == zone.NextMap && MapZone == zone.NextZone && !UniqueIdInZone.Contains(zone.UniqueId))

@@ -45,7 +45,7 @@ namespace SiegeOnlineClient.ClientLogic.Event
 
         /// <summary>
         /// 类型：方法
-        /// 名称：EnterWorldEventArgs
+        /// 名称：WorldEnterEventArgs
         /// 作者：taixihuase
         /// 作用：用自身角色进入场景所感兴趣的数据构造事件数据
         /// 编写日期：2015/7/22
@@ -61,7 +61,7 @@ namespace SiegeOnlineClient.ClientLogic.Event
 
         /// <summary>
         /// 类型：方法
-        /// 名称：EnterWorldEventArgs
+        /// 名称：WorldEnterEventArgs
         /// 作者：taixihuase
         /// 作用：用任意角色进入场景所感兴趣的数据构造事件数据
         /// 编写日期：2015/7/22

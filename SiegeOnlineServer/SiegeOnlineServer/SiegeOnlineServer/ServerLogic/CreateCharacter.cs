@@ -33,7 +33,7 @@ namespace SiegeOnlineServer.ServerLogic
     /// 作用：响应创建角色请求
     /// 编写日期：2015/7/14
     /// </summary>
-    public class CreateCharacter
+    public static class CreateCharacter
     {
         /// <summary>
         /// 类型：方法
@@ -71,14 +71,10 @@ namespace SiegeOnlineServer.ServerLogic
             peer.Server.Characters.CharacterLoad(character);
 
             byte[] data = Serialization.Serialize(character);
-
-            var parameter = new Dictionary<byte, object>
+            OperationResponse response = new OperationResponse((byte) OperationCode.CreateCharacter)
             {
-                {(byte) ParameterCode.CreateCharacter, data}
-            };
-            OperationResponse response = new OperationResponse((byte) OperationCode.CreateCharacter, parameter)
-            {
-                ReturnCode = (short) ErrorCode.Ok,
+                Parameters = new Dictionary<byte, object> {{(byte) ParameterCode.CreateCharacter, data}},
+                ReturnCode = (short)ErrorCode.Ok,
                 DebugMessage = "创建角色成功！"
             };
 

@@ -33,7 +33,7 @@ namespace SiegeOnlineServer.ServerLogic
     /// 作用：响应进入场景请求
     /// 编写日期：2015/7/22
     /// </summary>
-    public class WorldEnter
+    public static class WorldEnter
     {
         /// <summary>
         /// 类型：方法
@@ -76,23 +76,20 @@ namespace SiegeOnlineServer.ServerLogic
             // 返回数据给客户端
 
             byte[] pos = Serialization.Serialize(character.Position);
+            OperationResponse responseData = new OperationResponse((byte) OperationCode.WorldEnter)
 
-            OperationResponse responseData = new OperationResponse((byte) OperationCode.WorldEnter,
-                new Dictionary<byte, object>
-                {
-                    {(byte) ParameterCode.WorldEnter, pos}
-                })
             {
+                Parameters = new Dictionary<byte, object> {{(byte) ParameterCode.WorldEnter, pos}},
                 ReturnCode = (short) ErrorCode.Ok,
                 DebugMessage = "进入场景成功"
             };
             peer.SendOperationResponse(responseData, sendParameters);
 
             byte[] data = Serialization.Serialize(character);
-            EventData eventData = new EventData((byte) EventCode.WorldEnter, new Dictionary<byte, object>
+            EventData eventData = new EventData((byte) EventCode.WorldEnter)
             {
-                {(byte) ParameterCode.WorldEnter, data}
-            });
+                Parameters = new Dictionary<byte, object> {{(byte) ParameterCode.WorldEnter, data}}
+            };
             eventData.SendTo(peer.Server.Characters.GamingClientsToBroadcast, sendParameters);
         }
     }

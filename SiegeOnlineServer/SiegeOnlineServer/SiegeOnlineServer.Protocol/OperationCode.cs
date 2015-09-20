@@ -49,7 +49,6 @@ namespace SiegeOnlineServer.Protocol
         Idle, // 空闲
         WalkForward, // 向前走
         WalkBackward, // 倒退走
-        Run, // 跑步
         Jump, // 原地跳跃
         JumpForward, // 向前跳跃
         JumpBackward, // 向后跳跃

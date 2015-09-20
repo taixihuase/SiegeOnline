@@ -88,7 +88,7 @@ namespace SiegeOnline.ClientLogic.Scene.UserScene
 
             // 注册方法
             PhotonService.Events.MyLogin += CharacterNotExist;
-            PhotonService.Events.MyLogin += ErrorInput;
+            PhotonService.Events.MyLogin += WrongInput;
             PhotonService.Events.MyLogin += RepeatedLogin;
             PhotonService.Events.MyLogin += CharacterExist;
         }
@@ -196,14 +196,14 @@ namespace SiegeOnline.ClientLogic.Scene.UserScene
 
         /// <summary>
         /// 类型：方法
-        /// 名称：ErrorInput
+        /// 名称：WrongInput
         /// 作者：taixihuase
         /// 作用：当账号或密码有误时触发
         /// 编写日期：2015/7/29
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ErrorInput(object sender, LoginEventArgs e)
+        private void WrongInput(object sender, LoginEventArgs e)
         {
             if (e.OperationResponse.ReturnCode == (short) ErrorCode.InvalidOperation)
             {
@@ -330,7 +330,7 @@ namespace SiegeOnline.ClientLogic.Scene.UserScene
         private void OnDestroy()
         {
             PhotonService.Events.MyLogin -= CharacterNotExist;
-            PhotonService.Events.MyLogin -= ErrorInput;
+            PhotonService.Events.MyLogin -= WrongInput;
             PhotonService.Events.MyLogin -= RepeatedLogin;
             PhotonService.Events.MyLogin -= CharacterExist;
         }

@@ -39,5 +39,6 @@ namespace SiegeOnlineServer.Protocol
         WorldEnter,
         WorldExit,
         ZoneUpdate,
+        Move,
     }
 }

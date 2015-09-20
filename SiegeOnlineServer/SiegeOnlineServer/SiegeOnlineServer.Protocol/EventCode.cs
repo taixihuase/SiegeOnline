@@ -39,5 +39,12 @@ namespace SiegeOnlineServer.Protocol
         WorldEnter,
         WorldExit,
         ZoneUpdate,
+
+        Idle,
+        WalkForward,
+        WalkBackward,
+        Jump,
+        JumpForward,
+        JumpBackward,
     }
 }

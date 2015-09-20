@@ -38,7 +38,7 @@ namespace SiegeOnlineServer.ServerLogic
     /// 作用：响应登录请求
     /// 编写日期：2015/7/14
     /// </summary>
-    public class Login
+    public static class Login
     {
         /// <summary>
         /// 类型：方法
@@ -122,8 +122,9 @@ namespace SiegeOnlineServer.ServerLogic
 
                 #endregion
 
-                OperationResponse response = new OperationResponse((byte) OperationCode.Login, parameter)
+                OperationResponse response = new OperationResponse((byte) OperationCode.Login)
                 {
+                    Parameters = parameter,
                     ReturnCode = returnCode,
                     DebugMessage = message
                 };
